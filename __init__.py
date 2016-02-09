@@ -13,7 +13,5 @@ has already been processed and what calibrations are available
 
 import numpy as np
 import scipy
-import matplotlib.pyplot as plt
 import pyfits as pf
-
-
+import monitor
