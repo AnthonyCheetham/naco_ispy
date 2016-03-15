@@ -47,8 +47,8 @@ Known bugs:
 #  The combination of the infinite loop and the plt.tight_layout() call (as well as the 
 #  plt.show() and plt.pause() calls) causes problems with the macosx backend
 import matplotlib as mpl
-#mpl.use('TkAgg') # if this doesn't work, try the next line instead
-mpl.use('QT4Agg')
+mpl.use('TkAgg') # if this doesn't work, try the next line instead
+#mpl.use('QT4Agg')
 
 import numpy as np
 
@@ -58,7 +58,7 @@ import astropy.io.fits as pyfits
 from astropy.time import Time
 from matplotlib.dates import DateFormatter
 import scipy.signal as signal
-#import pdb
+import pdb
 #from organise_data import detect_filetype
 
 plt.interactive(True)
@@ -101,7 +101,7 @@ def detect_filetype(hdr,get_folder_string=False):
         if agpm=='AGPM':
             if nexpo > nexpo_limit:
                 obstype='Target_AGPM'
-                folder_string='Raw'
+                folder_string='Targ'
             elif (expt < obstime_limits[1]) and (expt > obstime_limits[0]):
                 obstype='Sky'
                 folder_string='Sky'
@@ -111,7 +111,7 @@ def detect_filetype(hdr,get_folder_string=False):
         else:
             if (expt < obstime_limits[1]) and (expt > obstime_limits[0]):
                 obstype='Target_saturated'
-                folder_string='Raw'
+                folder_string='Targ'
             else:
                 obstype='Flux'
                 folder_string='Flux'
@@ -119,7 +119,7 @@ def detect_filetype(hdr,get_folder_string=False):
     elif type_flag=='SKY':
         obstype='Sky'
         folder_string='Sky'
-    elif type_flag=='FLAT,LAMP' or type_flag=='FLAT,SKY':
+    elif 'FLAT' in type_flag:
         obstype='Flat'
         folder_string='Flats'
     
@@ -128,7 +128,7 @@ def detect_filetype(hdr,get_folder_string=False):
     elif type_flag=='STD':
         obstype='Std'
         folder_string='STD'
-    elif type_flag=='DARK':
+    elif 'DARK' in type_flag:
         obstype='Dark'
         folder_string='Dark'
     else:
@@ -206,7 +206,8 @@ def diagnostic_plots(axes,capture_time,peakcounts,bgflux,parangs,clean_im):
         ax4.imshow(clean_im)
     except:
         pass
-    ax4.set_title('Clean image (will be psf width in the future)')
+    ax4.set_title('Clean image')
+#    ax4.set_title('Clean image (will be psf width in the future)')
 
 ###################
 
@@ -262,6 +263,7 @@ def run_and_process(folder='./',prefix='NACO',suffix='.fits',
     peakcounts=np.array([])
     bgflux=np.array([])
     parangs=np.array([])
+    target_names=np.array([])
     
     # Set up the plots
     fig,axes=plt.subplots(2,2,num=0)
@@ -304,6 +306,7 @@ def run_and_process(folder='./',prefix='NACO',suffix='.fits',
                 
                 # Classify the file (we only care about sky and target for now)
                 obstype=detect_filetype(head)
+                
                 
                 # If it is a saturated psf, we can make a dodgy sky by combining all of the data
                 if obstype=='Target_saturated':
@@ -398,6 +401,11 @@ def run_and_process(folder='./',prefix='NACO',suffix='.fits',
                     parang=head['HIERARCH ESO ADA POSANG']
                     parang = ((parang + 360) % 360)
                     parangs=np.append(parangs,parang)
+                    
+                    # Find the target name
+                    target_name=head['HIERARCH ESO OBS NAME']
+                    target_names=np.append(target_names,target_name)
+                    last_target_name=target_name
                 
                 
             # Find the order that the data was taken in, by sorting the observation times
@@ -405,7 +413,13 @@ def run_and_process(folder='./',prefix='NACO',suffix='.fits',
                 display_sz=80
                 cropped_im=clean_im[mx[0][0]-display_sz/2:mx[0][0]+display_sz/2,
                                     mx[1][0]-display_sz/2:mx[1][0]+display_sz/2]
-                diagnostic_plots(axes,capture_time,peakcounts,bgflux,parangs,cropped_im)
+                                    
+                # Remove all data from previous targets and only plot the current one
+                target_ix=target_names==last_target_name
+#                pdb.set_trace()
+                
+                diagnostic_plots(axes,capture_time[target_ix],peakcounts[target_ix],
+                                 bgflux[target_ix],parangs[target_ix],cropped_im)
                 if first_plot==True:
                     plt.tight_layout()
                     first_plot=False
