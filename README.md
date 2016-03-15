@@ -17,9 +17,9 @@ wait until it has at least 2 frames.
   It will ignore flux frames if their exposure times are NOT between 0.1-0.5s 
 
 To run it, put monitor.py somewhere on the NACO offline machine, then run
-
-    >import monitor
-    >monitor.run_and_process(folder='/path/to/the/data/')
+	> python
+    > import monitor
+    > monitor.run_and_process(folder='/path/to/the/data/')
 
 ###Advanced Options:
 *   prefix (default='NACO') + suffix (default='.fits'): To find the files, it looks for prefix+'*'+suffix. So if your files are named differently, change these
