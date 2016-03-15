@@ -11,7 +11,7 @@ This repository contains two main functions:
 ## Real-time analysis code:
 
   This is intended to be run on the offline machine at Paranal, and monitors a folder for incoming data.
-  You should exit and relaunch the program when you change stars, so that the plots are all reset.
+  It will detect changes in the OB name and reset the plots so that you only need to run it once.
   Unfortunately it will not plot anything until it finds a sky frame, since it can't find the peak or estimate the background level without a sky. For non-AGPM frames, it will 
 wait until it has at least 2 frames.
   It will ignore flux frames if their exposure times are NOT between 0.1-0.5s 
