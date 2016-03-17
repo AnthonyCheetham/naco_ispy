@@ -73,7 +73,6 @@ obstime_limits=[0.1,0.5] # all target/sky observations have exp times in this ra
 smooth_dist=4 # FWHM of gaussian used to smooth the images before measuring the 
               # background and finding the centre
 
- # NEED TO REMOVE THIS and import from organise_data instead!
 def detect_filetype(hdr,get_folder_string=False):
     ''' Works out what kind of file it is based on the header'''
     
