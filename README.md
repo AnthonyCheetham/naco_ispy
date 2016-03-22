@@ -27,3 +27,14 @@ To run it, put monitor.py somewhere on the NACO offline machine, then run
 *   pause_interval (default=2): The number of seconds to wait between updates.
 *   crop_size (default=500): The number of pixels to consider. 1024x1024 images are slow to process, so this will cut the images down (around the centre) before processing.
 *   new_only (default=True): This switch allows you to look at all files in the directory, or just those that are added after the program is started.
+
+
+
+
+Copyright (C) 2016 Anthony Cheetham and the NACO-ISPY team
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
