@@ -16,8 +16,6 @@ Purpose of Calib Database:
     - Keep track of each calibration file (flats, true north offsets?)
 
 TODO:
-    - Encrypt passwords
-    - Update entry method
     - Define database fields properly somewhere easy to access
 
 """
@@ -86,11 +84,11 @@ class obs_table(object):
         self.table_format=table_format
         
         # Define the columns and column names
-        self.columns=('ObsID','TargetName','Band','AGPM','AnalysisStatus','FieldRotation',
+        self.columns=('TargetName','Band','AGPM','AnalysisStatus','FieldRotation',
                  'r0','t0','Location','Date','WindSpeed','ExpTime','SaturationLevel',
                  'PsfXWidth','PsfYWidth','Vmag','Kmag','PsfReference')
         f=np.float64
-        self.dtypes=(np.int_,'S40','S5',np.bool_,np.bool_,f,
+        self.dtypes=('S40','S20',np.bool_,np.bool_,f,
                 f,f,'S200',Time,f,f,f,
                 f,f,f,f,np.bool_)
                 
@@ -278,6 +276,7 @@ class obs_table(object):
 ########################
         
 ########################
+        
 class calib_table(obs_table):
     ''' An alternative to the calibrations database object. This is just a locally
     stored astropy table. This is a sub-class of the obs_table class.
@@ -286,30 +285,79 @@ class calib_table(obs_table):
         - 
     '''
     
-    def __init__(self,filename='./calib_table.dat',table_format='ascii.csv'):
+    def __init__(self,filename='./calib_table.dat',table_format='ascii.csv',
+                 data_folder='/Users/cheetham/data/naco_data/GTO/'):
                 
         self.filename=filename
         self.table_format=table_format
         
         # Define the columns and column names
-        self.columns=('CalibID','Band','Type','AnalysisStatus','Location',
-                 'Date')
-        f=np.float64
-        self.dtypes=(np.int_,np.int_,'S5',np.bool_,np.bool_,f,
-                f,f,'S200',datetime.datetime,f,f,f,
-                f,f,f,f,np.bool_)
+        self.columns=('Band','Type','QualityFlag','Location',
+                 'Date','NAXIS1','NAXIS2')
+
+        self.dtypes=('S10','S10',np.bool_,'S200',Time,np.int,np.int)
         
         try:
             data=Table.read(filename,format=table_format)
             self.data=data
         except:
             print 'Calibrations Table not found!',filename
+            
         
+        if data_folder[-1] != os.sep:
+            data_folder=data_folder+os.sep
+        self.data_folder=data_folder+'Calib'+os.sep
+            
+    
+    ########################
+    
+    def search(self,read_every_n=5):
+        ''' Search self.data_folder for relevant files and update the table 
+        with relevant information
+        '''
+        
+        # Go through the reduced cal files one-by-one
+        # Find the flats
+        all_flats=sorted(glob.glob(self.data_folder+'*/*/Flat*.fits'))
+        
+        for flat_file in all_flats:
+            
+            calib_row={}
+            
+            # Read the header
+            with pf.open(flat_file) as f:
+                header=f[0].header
+
+            calib_row['Location']=flat_file
+                
+            #Get the relevant params from the header            
+            calib_row['Band']=header['Filter']
+            calib_row['Type']=header['Flat Type']
+            calib_row['QualityFlag']=header['Flat Quality']
+            calib_row['Date']=header['MJD-OBS']
+            calib_row['NAXIS1']=header['NAXIS1']
+            calib_row['NAXIS2']=header['NAXIS2']
+            
+            # How do we get this?
+#            calib_row['CalibID']
+            
+            # Update the table
+            self.data.add_row(calib_row)
+        
+        # Find the astrometric calibrations
+        print 'Astrometric calibrations not implemented'
         
 
 # Maybe astropy tables are the best way to go?
-db=obs_table()
-db.create()
+#db=obs_table()
+#db.create()
+###
+#db.search()
+#db.save()
+
+#cal_db=calib_table()
+#cal_db.create()
+##
+#cal_db.search()
+#cal_db.save()
 #
-db.search()
-db.save()
