@@ -18,7 +18,7 @@ from monitor import detect_filetype
 ###############
 
 def unorganise_data(folder,prefix='NACO_',suffix='.fits',dry_run=True,
-                    save_dir='/Users/cheetham/data/naco_data/GTO/New/'):
+                    save_dir='./New/'):
                         
     ''' 
     This undoes the effects of organise_data, an puts all of the files into 
@@ -54,8 +54,8 @@ def unorganise_data(folder,prefix='NACO_',suffix='.fits',dry_run=True,
 
 ###############    
 
-def organise_data(folder,prefix='NACO_',suffix='.fits',dry_run=True,
-              save_dir='/Users/cheetham/data/naco_data/GTO/New/'):
+def organise_data(folder,prefix='NACO',suffix='.fits',dry_run=True,
+              save_dir='./'):
     """ 
     Looks at all fits files in a folder and moves them to a consistent 
     directory structure.
@@ -73,6 +73,7 @@ def organise_data(folder,prefix='NACO_',suffix='.fits',dry_run=True,
 
     # Find the files    
     files=glob.glob(folder+prefix+'*'+suffix)
+    files.sort()
     
     if save_dir[-1] != '/':
         save_dir=save_dir+'/'
@@ -88,7 +89,9 @@ def organise_data(folder,prefix='NACO_',suffix='.fits',dry_run=True,
         
         # Now find the relevant information
         try:
-            target_name=hdr['HIERARCH ESO OBS TARG NAME'] # this will fail for cal files
+            # this will fail for cal files
+            target_name=hdr['HIERARCH ESO OBS TARG NAME'] 
+#            target_name=hdr['HIERARCH ESO OBS NAME']# this was changed for astcals
         except:
             target_name=''
         mjd=hdr['MJD-OBS']
@@ -103,13 +106,18 @@ def organise_data(folder,prefix='NACO_',suffix='.fits',dry_run=True,
         
         date_time=Time(mjd-0.5,format='mjd')
         date,dummy=date_time.iso.split(' ')
-        
-        if science_flag=='SCIENCE':
+
+        # We have to handle the astrometric calibrators first        
+        if 'AstCal' in obstype:
+            # If the target name stops saying AstCal, we should change this!
+#            location=save_dir+'Calib/'+date+'/'+target_name+'/'+folder_string+'/'
+            location=save_dir+'Calib/'+date+'/'+folder_string+'/'
+        elif science_flag=='SCIENCE':
             location=save_dir+'Science/'+date+'/'+target_name+'/'+folder_string+'/'
         elif science_flag=='CALIB':            
             location=save_dir+'Calib/'+date+'/'+folder_string+'/'
         elif science_flag=='ACQUISITION':
-            location=save_dir+'Science/'+date+'/'+target_name+'/'
+            location=save_dir+'Science/'+date+'/'+target_name+'/Acq/'
         else:
             print('Unrecognised science_flag:',science_flag)
             location=''
@@ -127,8 +135,6 @@ def organise_data(folder,prefix='NACO_',suffix='.fits',dry_run=True,
                 os.rename(filename,location+outname)
             except:
                 print("Failed to move:",filename,'to',location+outname)
-        
-    return hdr
     
 ###############
     

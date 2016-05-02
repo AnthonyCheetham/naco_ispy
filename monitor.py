@@ -59,14 +59,13 @@ from astropy.time import Time
 from matplotlib.dates import DateFormatter
 import scipy.signal as signal
 import pdb
-#from organise_data import detect_filetype
 
 plt.interactive(True)
 
 # Here are all of the hard-coded numbers in case we need to change any
 nonlinear_limit=18000.
 saturate_limit=22000.
-minimum_flux=-6000. # The actual "zero" point
+minimum_flux=-7000. # The actual "zero" point
 nexpo_limit=2 # If nexpo > 2, this indicates that it is a target observation. otherwise, sky
 obstime_limits=[0.1,0.5] # all target/sky observations have exp times in this range. Anything outside is a flux frame.
 
@@ -74,20 +73,30 @@ smooth_dist=4 # FWHM of gaussian used to smooth the images before measuring the
               # background and finding the centre
 
 def detect_filetype(hdr,get_folder_string=False):
-    ''' Works out what kind of file it is based on the header'''
+    ''' Works out what kind of file it is based on the header.
+    This function is necessarily complicated and hard to read, since there
+    are so many cases it has to cover.'''
     
     type_flag=hdr['HIERARCH ESO DPR TYPE']
     expt=hdr['EXPTIME'] # exposure time.
     agpm=hdr['HIERARCH ESO INS OPTI1 ID'] # this is AGPM if it is used
+    targ_name=hdr['HIERARCH ESO OBS NAME']
+    naxis=hdr['NAXIS']
 
     try:
         nexpo=hdr['HIERARCH ESO SEQ NEXPO']
     except:
         nexpo=0
+
+    # Now format all of these strings
+    if 'astcal' in targ_name.lower():
+    # Astrometric calibrators are an annoying case that we have to deal with first
+    # For now, assume they have "AstCal" in their target names
+
+        obstype='AstCal'
+        folder_string='AstCal'
     
-    
-    # Now format all of these strings      
-    if type_flag=='OBJECT':
+    elif type_flag=='OBJECT':
         # We need to work out which of the "OBJECT" frames are skies, flux 
         #  frames and actual target observations.
         #
@@ -135,6 +144,11 @@ def detect_filetype(hdr,get_folder_string=False):
         print 'Unrecognised DPR type:',type_flag
         obstype='Unknown'
         folder_string='Uncategorized'
+        
+    # But if it has NAXIS3=0, it is really an acquisition!
+    if naxis==2:
+        folder_string='Acq_'+folder_string
+        
     
     if get_folder_string:
         return obstype,folder_string
