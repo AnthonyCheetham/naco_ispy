@@ -19,4 +19,4 @@ else:
 # Where is the data?
 folder='/data-ut1/raw/'+date+'/'
 # Run the monitor
-naco_ispy.monitor(folder=folder)
+naco_ispy.monitor.run_and_process(folder=folder)
