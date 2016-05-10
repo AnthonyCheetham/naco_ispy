@@ -14,19 +14,28 @@ This repository contains two main functions:
   It will detect changes in the OB name and reset the plots so that you only need to run it once.
   Unfortunately it will not plot anything until it finds a sky frame, since it can't find the peak or estimate the background level without a sky. For non-AGPM frames, it will 
 wait until it has at least 2 frames.
-  It will ignore flux frames if their exposure times are NOT between 0.1-0.5s 
+  There is a set of logic that helps it to decide whether a file is a flux, sky or regular target observation. It uses the exposure time, number of exposures and detector windowing to decide.
 
 To run it, put monitor.py somewhere on the NACO offline machine, then run
 
-	> python
+	> python monitor.py
+
+When run in this way, monitor.py will work out the current date and run the function "run_and_process" on the directory /data-ut1/raw/year-month-day/ . If this fails, you can start it manually using the following commands (in the same directory as the file)
+
+    > python
     > import monitor
     > monitor.run_and_process(folder='/path/to/the/data/')
 
+When you are finished with it, press ctrl+c to exit.
+
+You can download the monitor.py file individually using wget: 
+    > wget https://rawgit.com/AnthonyCheetham/naco_ispy/master/monitor.py 
+
 ###Advanced Options:
-*   prefix (default='NACO') + suffix (default='.fits'): To find the files, it looks for prefix+'*'+suffix. So if your files are named differently, change these
+*   prefix (default='NACO') + suffix (default='.fits'): To find the files, it looks for prefix+'*'+suffix. So if your files are named differently, change these.
 *   pause_interval (default=2): The number of seconds to wait between updates.
 *   crop_size (default=500): The number of pixels to consider. 1024x1024 images are slow to process, so this will cut the images down (around the centre) before processing.
-*   new_only (default=True): This switch allows you to look at all files in the directory, or just those that are added after the program is started.
+*   new_only (default=True): This switch allows you to look at all files in the directory, or just those that were added after the program started.
 
 
 

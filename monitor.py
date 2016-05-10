@@ -53,12 +53,12 @@ mpl.use('TkAgg') # if this doesn't work, try the next line instead
 import numpy as np
 
 import matplotlib.pyplot as plt
-import glob,time
+import glob,time,datetime
 import astropy.io.fits as pyfits
 from astropy.time import Time
 from matplotlib.dates import DateFormatter
 import scipy.signal as signal
-import pdb
+#import pdb
 
 plt.interactive(True)
 
@@ -456,6 +456,22 @@ def run_and_process(folder='./',prefix='NACO',suffix='.fits',
 
 ###################
 
+# This code should run if you run it directly, e.g. python monitor.py
+# It should get the correct date and monitor the correct folder on the offline 
+#  machine at Paranal.
+if __name__ == "__main__":
+    current_time=datetime.datetime.today()
 
-#run(folder='./')
-#run_and_process(folder='./',new_only=True,crop_size=400)
+    # What was the date at the beginning of the night?
+    datestr='{0:4d}-{1:02d}-{2:02d}' # yyyy-mm-dd
+    if current_time.hour <12: # So midday in Chile is where the date swaps.
+        # it is after midnight but before midday so take away a day
+        date=datestr.format(current_time.year,current_time.month,current_time.day-1)
+    else:
+        # it is after midday so the date is correct
+        date=datestr.format(current_time.year,current_time.month,current_time.day)
+    
+    # Where is the data?
+    folder='/data-ut1/raw/'+date+'/'
+    # Run the monitor
+    run_and_process(folder=folder)
