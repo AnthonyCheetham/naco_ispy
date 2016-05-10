@@ -63,9 +63,13 @@ import pdb
 plt.interactive(True)
 
 # Here are all of the hard-coded numbers in case we need to change any
-nonlinear_limit=18000.
-saturate_limit=22000.
-minimum_flux=-7000. # The actual "zero" point
+#nonlinear_limit=18000.
+#saturate_limit=22000.
+#minimum_flux=-7000. # The actual "zero" point
+nonlinear_limit=11000.
+saturate_limit=15000.
+minimum_flux=0. # This should reduce some confusion
+
 nexpo_limit=2 # If nexpo > 2, this indicates that it is a target observation. otherwise, sky
 obstime_limits=[0.1,0.5] # all target/sky observations have exp times in this range. Anything outside is a flux frame.
 
@@ -82,6 +86,7 @@ def detect_filetype(hdr,get_folder_string=False):
     agpm=hdr['HIERARCH ESO INS OPTI1 ID'] # this is AGPM if it is used
     targ_name=hdr['HIERARCH ESO OBS NAME']
     naxis=hdr['NAXIS']
+    naxis1=hdr['NAXIS1']
 
     try:
         nexpo=hdr['HIERARCH ESO SEQ NEXPO']
@@ -110,14 +115,14 @@ def detect_filetype(hdr,get_folder_string=False):
             if nexpo > nexpo_limit:
                 obstype='Target_AGPM'
                 folder_string='Targ'
-            elif (expt < obstime_limits[1]) and (expt > obstime_limits[0]):
+            elif (expt < obstime_limits[1]) and (expt > obstime_limits[0]) and (naxis1 >512):
                 obstype='Sky'
                 folder_string='Sky'
             else:
                 obstype='Flux'
                 folder_string='Flux'
         else:
-            if (expt < obstime_limits[1]) and (expt > obstime_limits[0]):
+            if ((expt < obstime_limits[1]) and (expt > obstime_limits[0])):
                 obstype='Target_saturated'
                 folder_string='Targ'
             else:
@@ -146,7 +151,7 @@ def detect_filetype(hdr,get_folder_string=False):
         folder_string='Uncategorized'
         
     # But if it has NAXIS3=0, it is really an acquisition!
-    if naxis==2:
+    if naxis==2 and (obstype != 'Flat') and (obstype !='Dark'):
         folder_string='Acq_'+folder_string
         
     
@@ -217,6 +222,7 @@ def diagnostic_plots(axes,capture_time,peakcounts,bgflux,parangs,clean_im):
     ax4.cla()
     try:
         ax4.imshow(clean_im)
+        ax4.colorbar()
     except:
         pass
     ax4.set_title('Clean image')
