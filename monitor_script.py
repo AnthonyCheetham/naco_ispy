@@ -3,7 +3,7 @@
 This script makes running the real-time monitor as simple as possible
 """
 
-import naco_ispy,datetime
+import monitor,datetime
 
 current_time=datetime.datetime.today()
 
@@ -19,4 +19,4 @@ else:
 # Where is the data?
 folder='/data-ut1/raw/'+date+'/'
 # Run the monitor
-naco_ispy.monitor.run_and_process(folder=folder)
+monitor.run_and_process(folder=folder)
