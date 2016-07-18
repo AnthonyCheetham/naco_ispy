@@ -84,7 +84,10 @@ def detect_filetype(hdr,get_folder_string=False):
     type_flag=hdr['HIERARCH ESO DPR TYPE']
     expt=hdr['EXPTIME'] # exposure time.
     agpm=hdr['HIERARCH ESO INS OPTI1 ID'] # this is AGPM if it is used
-    targ_name=hdr['HIERARCH ESO OBS NAME']
+    try:
+        targ_name=hdr['HIERARCH ESO OBS NAME']
+    except:
+        targ_name='NoName'
     naxis=hdr['NAXIS']
     naxis1=hdr['NAXIS1']
 
