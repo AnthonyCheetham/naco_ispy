@@ -3,7 +3,7 @@ Python tools for the NACO-ISPY survey
 
 This repository contains two main functions:
 
-1. The automated reduction pipeline. This consists of two submodules: a data organiser and a database tool.
+1. The automated reduction pipeline. This consists of three submodules: a data organiser, a database tool and a module that scrapes information from the headers of files (for making summary files and checking that a sequence is consistent and ready to process).
 
 2. The real-time analysis code. This is an infinite loop that you can run on the offline machine at Paranal, 
   and it will plot important information about the data as it arrives.
