@@ -27,6 +27,7 @@ from astropy.time import Time
 from astropy.table import Table
 import datetime
 from monitor import detect_filetype
+import organise_data
 
 ########################
 
@@ -62,12 +63,16 @@ def read_rdb(rdb_file,h=0,comment=None):
 	return data_list
 
         
-########################  
+########################
         
 class obs_table(object):
     ''' This class represents a locally stored astropy table which contains all
     of the relevant information about the data it finds (such as the target name,
     date, type, status, field rotation etc.
+    
+    If you want to change from astropy tables to a database, it should be easy
+    to change the __init__ , create, save and add_entry functions. The rest 
+    should work.
 
     filename : the name of the stored table
     table_format : the format of the stored table
@@ -84,12 +89,12 @@ class obs_table(object):
         self.table_format=table_format
         
         # Define the columns and column names
-        self.columns=('TargetName','Band','AGPM','AnalysisStatus','FieldRotation',
-                 'r0','t0','Location','Date','WindSpeed','ExpTime','SaturationLevel',
+        self.columns=('TargetName','Band','AGPM','AnalysisStatus','ConsistentSequence','FieldRotation',
+                 'r0','t0','Location','Date','Time','WindSpeed','ExpTime','SaturationLevel',
                  'PsfXWidth','PsfYWidth','Vmag','Kmag','PsfReference')
         f=np.float64
-        self.dtypes=('S40','S20',np.bool_,np.bool_,f,
-                f,f,'S200',Time,f,f,f,
+        self.dtypes=('S40','S20',np.bool_,'S40',np.bool_,f,
+                f,f,'S200','S12','S14',f,f,f,
                 f,f,f,f,np.bool_)
                 
         if data_folder[-1] != os.sep:
@@ -123,10 +128,15 @@ class obs_table(object):
         ''' A wrapper that adds the observing sequence data to the table of observations.
         Assumes that all of the data is stored in a dictionary as obs_sequence.dict'''
         
-        self.data.add_row(obs_sequence.dict)
-        # save it to disk        
-        print 'Saving table as',self.filename
-        self.data.write(self.filename,format=self.table_format)
+        # Remove any previous entry based on a duplication of the Location value
+        self.data.remove_rows(self.data['Location'] == obs_sequence['Location'])
+        
+        # Add the new row
+        self.data.add_row(obs_sequence)
+        
+        # save it to disk (actually we can do this at the end)
+#        print 'Saving table as',self.filename
+#        self.data.write(self.filename,format=self.table_format)
         
     ########################
 
@@ -151,6 +161,9 @@ class obs_table(object):
         else:
             filt=head['HIERARCH ESO INS OPTI5 ID']
         targ_row['Band']=filt
+        
+        # Exposure Time
+        targ_row['ExpTime']=head['HIERARCH ESO DET DIT']
 
         # Target Name        
         try:
@@ -160,7 +173,9 @@ class obs_table(object):
         targ_row['TargetName']=target_name
         
         # And the easy one
-        targ_row['Date']=Time(head['MJD-OBS']-0.5,format='mjd')
+        date=Time(head['MJD-OBS']-0.5,format='mjd').iso.split(' ')
+        targ_row['Date']=date[0]
+        targ_row['Time']=date[1]
         
         return targ_row
         
@@ -186,13 +201,22 @@ class obs_table(object):
             head=hdulist[0].header
             
             # Append the values to the arrays defined earlier
-            parangs=np.append(parangs,(head['HIERARCH ESO ADA POSANG'] + 360) % 360)
+            try:
+                parangs=np.append(parangs,(head['HIERARCH ESO ADA POSANG'] + 360) % 360)
+            except:
+                print('Error finding ESO ADA POSANG header in: '+f)
+                parangs=0
             r0=np.append(r0,head['HIERARCH ESO AOS RTC DET DST R0MEAN'])
             t0=np.append(t0,head['HIERARCH ESO AOS RTC DET DST T0MEAN'])
             windspeed=np.append(windspeed,head['HIERARCH ESO TEL AMBI WINDSP'])
         
         # Average and save
-        targ_row['FieldRotation']=np.max(parangs)-np.min(parangs)
+        # We need to take care with the parangs in case they wrap.
+        #   We can calculate the rotation using parangs and parangs+180 and 
+        #   take the min, which works since FieldRotation<180deg
+        parangs180=(parangs+180.) % 360.
+        targ_row['FieldRotation']=np.min([np.max(parangs)-np.min(parangs),
+                                    np.max(parangs180)-np.min(parangs180)])
         targ_row['r0']=np.median(r0)
         targ_row['t0']=np.median(t0)
         targ_row['WindSpeed']=np.median(windspeed)
@@ -210,7 +234,6 @@ class obs_table(object):
         psf_xwidths=np.array([])
         psf_ywidths=np.array([])
         
-        
         # Loop over files        
         for rf in rdb_files:
             
@@ -226,7 +249,7 @@ class obs_table(object):
         
     ########################
         
-    def search(self,read_every_n=5):
+    def search(self,read_every_n=5,silent=False,dry_run=True):
         ''' Search self.data_folder for relevant files and update the table 
         with relevant information
         '''
@@ -251,17 +274,28 @@ class obs_table(object):
             # Now get the parameters we need the whole sequence for
             targ_row=self.get_sequence_info(targ_row,targ_files,read_every_n=read_every_n)
             
-            # Work out if the data has been processed based on whether the rdb files exist
-            rdb_files=sorted(glob.glob(targ_dir+'Targ/cube-info/all_info_framesel_*.rdb'))
+            # Work out if the data has been processed based on whether any rdb files exist
+            rdb_files=sorted(glob.glob(targ_dir+'Targ/cube-info/all_info_*.rdb'))
             if len(rdb_files) ==0:
-                targ_row['AnalysisStatus']=False
+                targ_row['AnalysisStatus']='NotStarted'
             else:
-                targ_row['AnalysisStatus']=True
+                targ_row['AnalysisStatus']='InProgress'
                 # Get the info from the rdb files
-                targ_row=self.get_rbd_info(targ_row,rdb_files)            
+                targ_row=self.get_rbd_info(targ_row,rdb_files)
+                
+            # ACTUALLY, we should get the X and Y widths from the processed psf files, if they exist.
+            
+            # And update the AnalysisStatus if the final_products have been added
+            # TODO
             
             # Miscellaneous things
             targ_row['Location']=targ_dir
+            
+            # Check that the sequence is consistent (i.e. all files use the same setup)
+            setup_keys=['filter','camera','nd','dit','ax1']
+            flux_ok,targ_ok=organise_data.check_directory_consistency(targ_dir,setup_keys,
+                      silent=silent,dry_run=dry_run)
+            targ_row['ConsistentSequence']= flux_ok & targ_ok
             
             # How do I get these?
 #            targ_row['SaturationLevel']=
@@ -270,7 +304,7 @@ class obs_table(object):
             targ_row['PsfReference']=True # Default value. Otherwise, set it to False manually
             
             # Update the table
-            self.data.add_row(targ_row)
+            self.add_entry(targ_row)
     
     
 ########################
@@ -349,10 +383,12 @@ class calib_table(obs_table):
         
 
 # Maybe astropy tables are the best way to go?
-#db=obs_table()
+#db=obs_table(data_folder='/Users/cheetham/data/data_archive/GTO/')
 #db.create()
-###
-#db.search()
+#######
+#db.search(silent=True)
+##db.search(silent=True)
+#db.data.show_in_browser(jsviewer=True)
 #db.save()
 
 #cal_db=calib_table()

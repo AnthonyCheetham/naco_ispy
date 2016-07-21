@@ -281,7 +281,7 @@ def find_consistent_flux(flux_files,all_info,setup_keys,n_min,n_max,silent=False
                     os.rename(flux_files[bad_ix],new_name)
             
             break
-    if is_ok == False:
+    if is_ok == False and (not silent):
         print("  Didn't find consistent setup!")
         
     return is_ok
