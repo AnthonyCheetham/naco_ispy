@@ -138,6 +138,9 @@ def detect_filetype(hdr,get_folder_string=False):
     elif 'FLAT' in type_flag:
         obstype='Flat'
         folder_string='Flats'
+    elif type_flag.lower=='psf-calibrator':
+        obstype='Flux'
+        folder_string='Flux'
     
     # We don't actually use any of the following types, but I thought we might as well
     # put them somewhere
