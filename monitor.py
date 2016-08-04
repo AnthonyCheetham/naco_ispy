@@ -472,6 +472,8 @@ if __name__ == "__main__":
     datestr='{0:4d}-{1:02d}-{2:02d}' # yyyy-mm-dd
     if current_time.hour <12: # So midday in Chile is where the date swaps.
         # it is after midnight but before midday so take away a day
+        delt=datetime.timedelta(1)
+        current_time-=delt
         date=datestr.format(current_time.year,current_time.month,current_time.day-1)
     else:
         # it is after midday so the date is correct
