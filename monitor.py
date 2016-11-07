@@ -82,6 +82,7 @@ def detect_filetype(hdr,get_folder_string=False):
     are so many cases it has to cover.'''
     
     type_flag=hdr['HIERARCH ESO DPR TYPE']
+#    type_cat = hdr['HIERARCH ESO DPR CATG']
     expt=hdr['EXPTIME'] # exposure time.
     agpm=hdr['HIERARCH ESO INS OPTI1 ID'] # this is AGPM if it is used
     try:
@@ -159,6 +160,7 @@ def detect_filetype(hdr,get_folder_string=False):
     # But if it has NAXIS3=0, it is really an acquisition!
     if naxis==2 and (obstype != 'Flat') and (obstype !='Dark'):
         folder_string='Acq_'+folder_string
+        obstype='Acq'
         
     
     if get_folder_string:
@@ -305,6 +307,13 @@ def run_and_process(folder='./',prefix='NACO',suffix='.fits',
         try:
             # Find the data in the folder
             files=glob.glob(folder+prefix+'*'+suffix)
+            
+            # Remove any acquisition files
+            acq_files = glob.glob(folder+'*ACQ*'+suffix)
+            files = set(files)
+            acq_files = set(acq_files)
+            files = list(files-acq_files)
+            
             
             nfiles=len(files)
             
@@ -474,7 +483,7 @@ if __name__ == "__main__":
         # it is after midnight but before midday so take away a day
         delt=datetime.timedelta(1)
         current_time-=delt
-        date=datestr.format(current_time.year,current_time.month,current_time.day-1)
+        date=datestr.format(current_time.year,current_time.month,current_time.day)
     else:
         # it is after midday so the date is correct
         date=datestr.format(current_time.year,current_time.month,current_time.day)
