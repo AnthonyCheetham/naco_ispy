@@ -11,10 +11,7 @@ Todo:
 """
 
 import astropy.io.fits as pf
-import numpy as np
-import scipy,glob,time
-import matplotlib.pyplot as plt
-import pdb
+import glob
 
 #####################
 target_keys={'tname':'HIERARCH ESO OBS NAME',

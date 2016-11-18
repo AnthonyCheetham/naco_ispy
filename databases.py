@@ -21,11 +21,10 @@ TODO:
 """
 
 import numpy as np
-import os,glob,time,string
+import os,glob,string
 import astropy.io.fits as pf
 from astropy.time import Time
 from astropy.table import Table
-import datetime
 from monitor import detect_filetype
 import organise_data
 
@@ -89,11 +88,13 @@ class obs_table(object):
         self.table_format=table_format
         
         # Define the columns and column names
-        self.columns=('TargetName','Band','AGPM','AnalysisStatus','ConsistentSequence','FieldRotation',
+        self.columns=('TargetName','Band','AGPM','AnalysisStatus','ConsistentSequence',
+                 'FluxProcessed','TargProcessed','FieldRotation',
                  'r0','t0','Location','Date','Time','WindSpeed','ExpTime','SaturationLevel',
                  'PsfXWidth','PsfYWidth','Vmag','Kmag','PsfReference')
         f=np.float64
-        self.dtypes=('S40','S20',np.bool_,'S40',np.bool_,f,
+        self.dtypes=('S40','S20',np.bool_,'S40',np.bool_,
+                np.bool_,np.bool_,f,
                 f,f,'S200','S12','S14',f,f,f,
                 f,f,f,f,np.bool_)
                 
@@ -106,6 +107,7 @@ class obs_table(object):
             self.data=data
         except:
             print 'Observations Table not found!',filename
+            self.create()
     
     ########################
     
@@ -249,7 +251,7 @@ class obs_table(object):
         
     ########################
         
-    def search(self,read_every_n=5,silent=False,dry_run=True):
+    def search(self,read_every_n=10,silent=False,dry_run=True):
         ''' Search self.data_folder for relevant files and update the table 
         with relevant information
         '''
@@ -266,27 +268,36 @@ class obs_table(object):
             targ_files=sorted(glob.glob(targ_dir+'Targ/NACO*.fits'))
             if len(targ_files) ==0:
                 print('Warning: No files found in directory:',targ_dir+'Targ/')
-                
-            # Take the middle file to estimate some params          
-            head=pf.getheader(targ_files[len(targ_files)/2])
-            targ_row=self.get_header_info(targ_row,head)
-            
-            # Now get the parameters we need the whole sequence for
-            targ_row=self.get_sequence_info(targ_row,targ_files,read_every_n=read_every_n)
-            
-            # Work out if the data has been processed based on whether any rdb files exist
-            rdb_files=sorted(glob.glob(targ_dir+'Targ/cube-info/all_info_*.rdb'))
-            if len(rdb_files) ==0:
-                targ_row['AnalysisStatus']='NotStarted'
             else:
-                targ_row['AnalysisStatus']='InProgress'
-                # Get the info from the rdb files
-                targ_row=self.get_rbd_info(targ_row,rdb_files)
+                # Take the middle file to estimate some params          
+                head=pf.getheader(targ_files[len(targ_files)/2])
+                targ_row=self.get_header_info(targ_row,head)
                 
-            # ACTUALLY, we should get the X and Y widths from the processed psf files, if they exist.
+                # Now get the parameters we need the whole sequence for
+                targ_row=self.get_sequence_info(targ_row,targ_files,read_every_n=read_every_n)
             
-            # And update the AnalysisStatus if the final_products have been added
-            # TODO
+            # Work out if the data has been processed based on what is in the ADI directory
+            # If there are files in the ADI subdirectory it could be finished
+            processed_files = glob.glob(targ_dir+'ADI/*.fits')
+            if targ_dir+'ADI/flux.fits' in processed_files:
+                targ_row['FluxProcessed']=True
+                # Get the info from the rdb files
+                rdb_files=sorted(glob.glob(targ_dir+'Flux/cube-info/all_info_framesel*.rdb'))
+                targ_row=self.get_rbd_info(targ_row,rdb_files)
+            else:
+                targ_row['FluxProcessed']=False
+                
+            if targ_dir+'ADI/master_cube_PCA.fits' in processed_files:
+                targ_row['TargProcessed']=True
+            else:
+                targ_row['TargProcessed']=False
+                
+            # And summarize this information in the AnalysisStatus
+            is_processed = targ_row['TargProcessed'] or targ_row['FluxProcessed']
+            if is_processed:
+                targ_row['AnalysisStatus']='InProgress'
+            else:
+                targ_row['AnalysisStatus']='NotStarted'
             
             # Miscellaneous things
             targ_row['Location']=targ_dir
@@ -382,14 +393,13 @@ class calib_table(obs_table):
         print 'Astrometric calibrations not implemented'
         
 
-# Maybe astropy tables are the best way to go?
-#db=obs_table(data_folder='/Users/cheetham/data/data_archive/GTO/')
+##  Maybe astropy tables are the best way to go?
+#db=obs_table(data_folder='/Users/cheetham/data/naco_data/GTO/')
 #db.create()
 #######
 #db.search(silent=True)
-##db.search(silent=True)
-#db.data.show_in_browser(jsviewer=True)
 #db.save()
+#db.data.show_in_browser(jsviewer=True)
 
 #cal_db=calib_table()
 #cal_db.create()
