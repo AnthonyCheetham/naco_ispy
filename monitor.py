@@ -58,6 +58,8 @@ import astropy.io.fits as pyfits
 from astropy.time import Time
 from matplotlib.dates import DateFormatter
 import scipy.signal as signal
+#from Tkinter import *
+#import tkMessageBox
 #import pdb
 
 plt.interactive(True)
@@ -258,6 +260,31 @@ def quick_clean(im,sky,crop_size):
 
 ###################
 
+def check_data(head,window=None):
+    ''' This program is a place to put any warnings that the data are bad
+        First use is for the Full_Uszd mask, since we never want to use it
+        but some datasets seem to have it even though the OB didn't ask for it
+    '''
+    warning = False
+    
+    if head['ESO INS OPTI3 NAME'] == 'Full_Uszd':
+
+        # If we want to make a text box pop up, use this code:
+        #centre screen message
+#        window.geometry("1x1+"+str(window.winfo_screenwidth()/2)+"+"+str(window.winfo_screenheight()/2))
+#        tkMessageBox.showwarning(title="NACO-ISPY monitor", message="WARNING! Full_Uszd mask is inserted. Ask the night astronomer to send a new preset")
+
+        # If we want to print the message to the console, use this code:
+        print('WARNING: Full_Uszd mask is inserted. Ask the night astronomer to send a new preset.')
+        warning = True
+        
+    return warning
+    
+
+###################
+
+###################
+
 
 def run_and_process(folder='./',prefix='NACO',suffix='.fits',
                     pause_interval=2.,crop_size=500,new_only=True):
@@ -300,6 +327,11 @@ def run_and_process(folder='./',prefix='NACO',suffix='.fits',
     skies={} # a dictionary to contain all of the skies
     clean_im=0
 
+    # Set up error window    
+#    window = Tk()
+#    window.wm_withdraw()
+    window = None
+
     # Begin the main loop
     repeats=0
     first_plot=True
@@ -340,6 +372,9 @@ def run_and_process(folder='./',prefix='NACO',suffix='.fits',
                 
                 # Classify the file (we only care about sky and target for now)
                 obstype=detect_filetype(head)
+                
+                # Print any warnings about the data or observing strategy
+                warnings = check_data(head,window)
                 
                 
                 # If it is a saturated psf, we can make a dodgy sky by combining all of the data
@@ -490,5 +525,7 @@ if __name__ == "__main__":
     
     # Where is the data?
     folder='/data-ut1/raw/'+date+'/'
+    print 'ACC hack!'
+    folder = '/Users/cheetham/data/naco_data/GTO/New/'
     # Run the monitor
     run_and_process(folder=folder)
