@@ -525,7 +525,6 @@ if __name__ == "__main__":
     
     # Where is the data?
     folder='/data-ut1/raw/'+date+'/'
-    print 'ACC hack!'
-    folder = '/Users/cheetham/data/naco_data/GTO/New/'
+
     # Run the monitor
     run_and_process(folder=folder)
