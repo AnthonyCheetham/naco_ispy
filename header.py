@@ -79,8 +79,8 @@ def get_info_from_files(files,keys_dict,wdir=''):
         # Datetime > date + time
         try:
             obsdate,obstime=info['datetime'].split('T')
-            info['obsdate']=obsdate
-            info['obstime']=obstime
+            info['obsdate']=str(obsdate)
+            info['obstime']=str(obstime)
         except:
             pass
         info['ix']=ix
@@ -90,7 +90,7 @@ def get_info_from_files(files,keys_dict,wdir=''):
             if info['filter1'].lower().startswith('empty'):
                 info['filter']=info['filter2']
             else:
-                info['filter']=info['filter1']        
+                info['filter']=info['filter1']
         except:
             pass
 
@@ -98,6 +98,7 @@ def get_info_from_files(files,keys_dict,wdir=''):
         try:
             info['parang']=(info['rotstart']+info['rotend'])/2.+info['alt']-(180.-(info['pastart']+info['paend'])/2.)
         except:
+            info['parang']=0.
             pass
         
     return all_info
@@ -106,7 +107,7 @@ def get_info_from_files(files,keys_dict,wdir=''):
 
 #####################      
 
-def make_header_file(wdir,prefix='NACO',extn='.fits',save_name='header.txt'):
+def make_header_file(wdir,prefix='NACO',extn='.fits',save_name='header.txt',header_keys=target_keys):
     ''' This program makes a file summarizing the information contained in the
     headers of each cube.
     wdir = working directory
@@ -124,7 +125,7 @@ def make_header_file(wdir,prefix='NACO',extn='.fits',save_name='header.txt'):
     print '  Files found:',nfiles
 
     # Use get_info_from_files to read through all of the headers and get the right values    
-    all_info=get_info_from_files(data_files,target_keys,wdir=wdir)
+    all_info=get_info_from_files(data_files,header_keys,wdir=wdir)
     
     line0='IX       TARGET          Date          Time         RA        Dec    ObsType   Filter   ND_Filter  AX1   AX3    DIT  NDIT  ParAng Camera NEXPO     File Name\n'
     

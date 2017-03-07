@@ -68,7 +68,8 @@ plt.interactive(True)
 #nonlinear_limit=18000.
 #saturate_limit=22000.
 #minimum_flux=-7000. # The actual "zero" point
-nonlinear_limit=11000.
+#nonlinear_limit=11000. # Dec 2015
+nonlinear_limit = 9500. # Dec 2016
 saturate_limit=15000.
 minimum_flux=0. # This should reduce some confusion
 
