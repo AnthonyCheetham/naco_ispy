@@ -89,12 +89,12 @@ class obs_table(object):
         
         # Define the columns and column names
         self.columns=('TargetName','Band','AGPM','AnalysisStatus','ConsistentSequence',
-                 'FluxProcessed','TargProcessed','FieldRotation',
+                 'FluxProcessed','TargProcessed','ADIProcessed','FieldRotation',
                  'r0','t0','Location','Date','Time','WindSpeed','ExpTime','SaturationLevel',
                  'PsfXWidth','PsfYWidth','Vmag','Kmag','PsfReference')
         f=np.float64
         self.dtypes=('S40','S20',np.bool_,'S40',np.bool_,
-                np.bool_,np.bool_,f,
+                np.bool_,np.bool_,np.bool_,f,
                 f,f,'S200','S12','S14',f,f,f,
                 f,f,f,f,np.bool_)
                 
@@ -292,9 +292,19 @@ class obs_table(object):
             else:
                 targ_row['TargProcessed']=False
                 
+            # Check if ADI has been run already by looking for subdirectories with _derot.fits files
+            adi_files = glob.glob(targ_dir+'ADI/*/*_derot.fits')
+            if len(adi_files) > 0:
+                targ_row['ADIProcessed']=True
+            else:
+                targ_row['ADIProcessed']=False
+                
             # And summarize this information in the AnalysisStatus
             is_processed = targ_row['TargProcessed'] or targ_row['FluxProcessed']
-            if is_processed:
+            is_finished = is_processed and targ_row['ADIProcessed']
+            if is_finished:
+                targ_row['AnalysisStatus']='Finished'
+            elif is_processed:
                 targ_row['AnalysisStatus']='InProgress'
             else:
                 targ_row['AnalysisStatus']='NotStarted'
@@ -394,10 +404,11 @@ class calib_table(obs_table):
         
 
 ##  Maybe astropy tables are the best way to go?
-#db=obs_table(data_folder='/Users/cheetham/data/naco_data/GTO/')
+#db=obs_table(data_folder='/Users/cheetham/data/naco_data/GTO/',
+#             filename='/Users/cheetham/data/naco_data/GTO/obs_table.dat')
 #db.create()
 #######
-#db.search(silent=True)
+#db.search(silent=False)
 #db.save()
 #db.data.show_in_browser(jsviewer=True)
 
