@@ -235,7 +235,7 @@ def check_consistency(all_info,setup_keys,n_min,n_max,obstype='targ',silent=Fals
 ###############              
 
 def find_consistent_flux(flux_files,all_info,setup_keys,n_min,n_max,silent=False,
-                         dry_run=True):
+                         dry_run=True,other_flux_ok = -1):
     ''' Find if there is a consistent sequence of flux frames that can be used.
     Since often the DIT will be changed after the OB starts, there may be one
     or two extra files with an incorrect DIT. This should flag them and move
@@ -260,7 +260,7 @@ def find_consistent_flux(flux_files,all_info,setup_keys,n_min,n_max,silent=False
         other_files = [ix for ix, this_setup in enumerate(setups) if this_setup != test_setup]
         n_matching = len(matching_files)
         
-        if (n_matching >= n_min) & (n_matching <= n_max):
+        if ((n_matching >= n_min) & (n_matching <= n_max)) or (n_matching == other_flux_ok):
             if not silent:
                 print('  Consistent setup found!')
                 
@@ -292,10 +292,15 @@ def find_consistent_flux(flux_files,all_info,setup_keys,n_min,n_max,silent=False
             
          
 def check_directory_consistency(folder,setup_keys,silent=False,dry_run=True,
-                n_flux_min=6,n_flux_max=6,n_targ_min=10,n_targ_max=1e6):
+                n_flux_min=6,n_flux_max=6,n_targ_min=10,n_targ_max=1e6,
+                other_flux_ok = 3):
     ''' Check a directory to see if the observing sequence is consistent.
     This is just a wrapper that combines check_consistency and 
     header.get_info_from_files
+
+    other_flux_ok: An alternative number of flux frames that is acceptable. 
+    For example, as long as a full dither sequence is completed, any multiple
+    of n_dither is ok. (3,6,9...)
     
     silent : if False, will print lots of diagnostic info at each step
     dry_run: if True, will not move or rename any files.
@@ -318,7 +323,7 @@ def check_directory_consistency(folder,setup_keys,silent=False,dry_run=True,
     # For the flux, we can check if there is a nice setup
     if not flux_ok:
         flux_ok=find_consistent_flux(flux_files,flux_info,setup_keys,n_flux_min,
-                 n_flux_max,silent=silent,dry_run=dry_run)
+                 n_flux_max,silent=silent,dry_run=dry_run,other_flux_ok = other_flux_ok)
 
     ########
     # Check the targ/sky frames

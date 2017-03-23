@@ -21,7 +21,7 @@ TODO:
 """
 
 import numpy as np
-import os,glob,string
+import os,glob,string,time
 import astropy.io.fits as pf
 from astropy.time import Time
 from astropy.table import Table
@@ -251,9 +251,13 @@ class obs_table(object):
         
     ########################
         
-    def search(self,read_every_n=10,silent=False,dry_run=True):
+    def search(self,read_every_n=10,silent=False,dry_run=True, fast_update = False):
         ''' Search self.data_folder for relevant files and update the table 
         with relevant information
+
+        if fast_update = True, this will ignore all of the things that are slow to calculate,
+         such as the r0, t0 and windspeed values. It will also skip sequences that were already
+         marked as consistent, since presumably they haven't been made worse.
         '''
         
         # Find the list of directories
@@ -261,10 +265,23 @@ class obs_table(object):
         
         # Big loop over directories
         for targ_dir in targ_directories:
-            
+
             # make a new row
             targ_row={}
-            
+
+            # If we want to speed up the process, load the data from previous runs
+            if fast_update and (targ_dir in self.data['Location']):
+                ix_of_same_dataset = np.where(self.data['Location'] == targ_dir)[0][0]
+                data_row = self.data[ix_of_same_dataset]
+
+                should_skip = True
+
+                # Load the data into it
+                for field in self.columns:
+                    targ_row[field] = data_row[field]
+            else:
+                should_skip = False
+
             targ_files=sorted(glob.glob(targ_dir+'Targ/NACO*.fits'))
             if len(targ_files) ==0:
                 print('Warning: No files found in directory:',targ_dir+'Targ/')
@@ -273,8 +290,9 @@ class obs_table(object):
                 head=pf.getheader(targ_files[len(targ_files)/2])
                 targ_row=self.get_header_info(targ_row,head)
                 
-                # Now get the parameters we need the whole sequence for
-                targ_row=self.get_sequence_info(targ_row,targ_files,read_every_n=read_every_n)
+                # Now get the parameters we need the whole sequence for (this is a slow step, but <5 sec)
+                if not should_skip:
+                    targ_row=self.get_sequence_info(targ_row,targ_files,read_every_n=read_every_n)
             
             # Work out if the data has been processed based on what is in the ADI directory
             # If there are files in the ADI subdirectory it could be finished
@@ -313,17 +331,27 @@ class obs_table(object):
             targ_row['Location']=targ_dir
             
             # Check that the sequence is consistent (i.e. all files use the same setup)
+            # This is a _very_ slow step (can be >10sec)
             setup_keys=['filter','camera','nd','dit','ax1']
-            flux_ok,targ_ok=organise_data.check_directory_consistency(targ_dir,setup_keys,
-                      silent=silent,dry_run=dry_run)
-            targ_row['ConsistentSequence']= flux_ok & targ_ok
-            
+            # If we want to do this quickly, then only look at the ones that were previously marked as inconsistent
+            if should_skip:
+                if not str(targ_row['ConsistentSequence']) == 'True':
+                    flux_ok,targ_ok=organise_data.check_directory_consistency(targ_dir,setup_keys,
+                          silent=silent,dry_run=dry_run)
+                    targ_row['ConsistentSequence']= (flux_ok or targ_row['FluxProcessed']) & (targ_ok  or targ_row['TargProcessed'])
+                else:
+                    print(targ_row['Location'])
+                    print('  Previously marked as Consistent, not updated')
+            else:
+                flux_ok,targ_ok=organise_data.check_directory_consistency(targ_dir,setup_keys,
+                  silent=silent,dry_run=dry_run)
+                targ_row['ConsistentSequence']= (flux_ok or targ_row['FluxProcessed']) & (targ_ok  or targ_row['TargProcessed'])
+    
             # How do I get these?
 #            targ_row['SaturationLevel']=
 #            targ_row['Vmag']=
 #            targ_row['Kmag']=
             targ_row['PsfReference']=True # Default value. Otherwise, set it to False manually
-            
             # Update the table
             self.add_entry(targ_row)
     
