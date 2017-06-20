@@ -133,8 +133,13 @@ def detect_filetype(hdr,get_folder_string=False):
                 obstype='Target_saturated'
                 folder_string='Targ'
             else:
-                obstype='Flux'
-                folder_string='Flux'
+                # This is a special case for M band observations, which need to have very short exposure times for target and flux
+                if hdr['ESO INS OPTI6 ID'] == 'M_prime':
+                    obstype='Target_saturated'
+                    folder_string='Targ'
+                else:
+                    obstype='Flux'
+                    folder_string='Flux'
                 
     elif type_flag=='SKY':
         obstype='Sky'

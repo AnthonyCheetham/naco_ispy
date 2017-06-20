@@ -154,6 +154,7 @@ class obs_table(object):
         elif obstype=='Target_saturated':
             targ_row['AGPM']=False
         else:
+            print('Error with file:'+str(head['ARCFILE']))
             raise ValueError('The file chosen by the database is not agpm or saturated!')
             
         # Filter:
@@ -262,12 +263,18 @@ class obs_table(object):
         
         # Find the list of directories
         targ_directories=glob.glob(self.data_folder+'*/*/')
+
+        # Load the already known directories so we can check at ones that are missing
+        known_locs = self.data['Location'].tolist()
         
         # Big loop over directories
         for targ_dir in targ_directories:
 
             # make a new row
             targ_row={}
+
+            # Remove it from the list of already known directories
+            known_locs.remove(targ_dir)
 
             # If we want to speed up the process, load the data from previous runs
             if fast_update and (targ_dir in self.data['Location']):
@@ -311,8 +318,9 @@ class obs_table(object):
                 targ_row['TargProcessed']=False
                 
             # Check if ADI has been run already by looking for subdirectories with _derot.fits files
-            adi_files = glob.glob(targ_dir+'ADI/*/*_derot.fits')
-            if len(adi_files) > 0:
+            adi_files = glob.glob(targ_dir+'ADI/GRAPHIC_PCA/*_derot.fits')
+            contrast_files = glob.glob(targ_dir+'ADI/GRAPHIC_PCA/contrast.txt')
+            if (len(adi_files) > 0) and (len(contrast_files) >0):
                 targ_row['ADIProcessed']=True
             else:
                 targ_row['ADIProcessed']=False
@@ -354,6 +362,10 @@ class obs_table(object):
             targ_row['PsfReference']=True # Default value. Otherwise, set it to False manually
             # Update the table
             self.add_entry(targ_row)
+
+        # Now known_locs contains only the directories that are in the old DB but no longer exist. So remove them
+        for removed_dir in known_locs:
+            self.data.remove_rows(self.data['Location'] == removed_dir)
     
     
 ########################
