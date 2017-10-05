@@ -132,10 +132,10 @@ def make_header_file(wdir,prefix='NACO',extn='.fits',save_name='header.txt',head
     # Now print everything to the file
     with open(save_name,'w') as myf:
         
-        line_template ="{ix:4d}  {tname:17}  {obsdate:10s}  {obstime:10s}  {RA:7.4f}  "
-        line_template+="{Dec:7.4f}  {obstype:8s}  {filter:8s}  {nd:7s}  {ax1:4d}  "
-        line_template+="{ax3:4d}  {dit:5.2f}  {ndit:3d}  {parang:8.3f}  {camera:3s}  "
-        line_template+="{nexpo:2d}  {fname:37}\n"
+        line_template ="{ix:4}  {tname:17}  {obsdate:10}  {obstime:10}  {RA:7.4}  "
+        line_template+="{Dec:7.4}  {obstype:8}  {filter:8}  {nd:7}  {ax1:4}  "
+        line_template+="{ax3:4}  {dit:5.2}  {ndit:3}  {parang:8.3}  {camera:3}  "
+        line_template+="{nexpo:2}  {fname:37}\n"
     
         myf.write(line0)
         for info in all_info:

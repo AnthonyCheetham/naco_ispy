@@ -274,7 +274,8 @@ class obs_table(object):
             targ_row={}
 
             # Remove it from the list of already known directories
-            known_locs.remove(targ_dir)
+            if targ_dir in known_locs:
+                known_locs.remove(targ_dir)
 
             # If we want to speed up the process, load the data from previous runs
             if fast_update and (targ_dir in self.data['Location']):
