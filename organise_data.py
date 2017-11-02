@@ -190,7 +190,8 @@ def copy_from_archive(archive_folder,save_folder,filename_list='copied_files.txt
     
 
     # Save the results
-    np.savetxt(filename_list,copied_files,fmt='%50s')
+    if not dry_run:
+        np.savetxt(filename_list,copied_files,fmt='%50s')
 
     if not silent:
         print(str(ncopied)+" files successfully copied from archive")
