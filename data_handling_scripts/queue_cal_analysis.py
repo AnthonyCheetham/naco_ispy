@@ -31,6 +31,8 @@ dry_run = args.dry_run
 # First, load the target database
 # calib_db = naco_ispy.databases.calib_table(filename=db_filename, data_folder=data_folder)
 
+scripts_directory = os.path.expanduser('~/code/naco_ispy/processing_scripts/')
+
 # Instead of using the database, use glob to find all folders
 all_folders = glob.glob(data_folder+'Calib/*/')
 
@@ -38,7 +40,7 @@ all_folders = glob.glob(data_folder+'Calib/*/')
 for targ_ix,targ_folder in enumerate(all_folders[0:num]):
 
     # Check what we want to process    
-    process_script = '~/code/naco_ispy/processing_scripts/naco_calibrations.slurm'
+    process_script = scripts_directory+'naco_calibrations.slurm'
     
     # The command to run:
     cmd = "echo 'bash "+process_script+"' | at -q b now"

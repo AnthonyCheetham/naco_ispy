@@ -36,6 +36,8 @@ data_folder = '/data/NACO/'
 db_filename = '/data/NACO/obs_table.dat'
 #data_folder='/Users/cheetham/data/naco_data/GTO/'
 #db_filename='/Users/cheetham/data/data_archive/GTO/obs_table.dat'
+
+scripts_directory = os.path.expanduser('~/code/naco_ispy/processing_scripts/')
         
 dry_run = args.dry_run
 
@@ -50,14 +52,14 @@ for targ_ix,targ_row in enumerate(obs_db.data[skip:num]):
 
     # Check which type of processing we want to launch
     if args.flux:
-        process_script = '/home/spectro/cheetham/code/naco_ispy/processing_scripts/flux.slurm'
+        process_script = scripts_directory+'flux.slurm'
         processed = targ_row['FluxProcessed']
     elif args.targ:
         processed = targ_row['TargProcessed']
         if str(targ_row['AGPM']) == 'True':
-            process_script = '/home/spectro/cheetham/code/naco_ispy/processing_scripts/agpm_graphic.slurm'
+            process_script = scripts_directory+'agpm_graphic.slurm'
         else:
-            process_script = '/home/spectro/cheetham/code/naco_ispy/processing_scripts/saturated_psf_graphic.slurm'
+            process_script = scripts_directory+'saturated_psf_graphic.slurm'
     elif args.pca:
         # Check that it is ready
         targ_processed = targ_row['TargProcessed']
@@ -72,9 +74,9 @@ for targ_ix,targ_row in enumerate(obs_db.data[skip:num]):
             consistent = 'True'
             
             if str(targ_row['AGPM']) == 'True':
-                process_script = '/home/spectro/cheetham/code/naco_ispy/processing_scripts/pca_graphic_agpm.slurm'
+                process_script = scripts_directory+'pca_graphic_agpm.slurm'
             else:
-                process_script = '/home/spectro/cheetham/code/naco_ispy/processing_scripts/pca_graphic_satpsf.slurm'
+                process_script = scripts_directory+'pca_graphic_satpsf.slurm'
         else:
             consistent = 'False' # Just to make sure it doesnt get processed
             continue
