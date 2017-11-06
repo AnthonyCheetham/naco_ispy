@@ -53,7 +53,7 @@ cd Sky
 rm $OUTPUT_FILE
 
 # # #  Remove the region outside the AGPM 
-mpirun $GRAPHIC_N_CORES_SKY $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_rm_overscan_"$GRAPHIC_VERSION".py" --pattern NACO --l_max 600 --centre_offset 267 290 --fix_naco_columns >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES_SKY $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_rm_overscan_"$GRAPHIC_VERSION".py" --pattern NACO --l_max 512 --centre_offset 267 290 --fix_naco_columns >> $OUTPUT_FILE
 
 # # #  # Calculate parallactic angle, but don't look for the star centre
 mpirun $GRAPHIC_N_CORES_SKY $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_naco_register_"$GRAPHIC_VERSION".py" --pattern o_NACO -no_psf -naco >> $OUTPUT_FILE
@@ -74,7 +74,7 @@ cd ..
 cd Targ
 
 #  Remove the region outside the AGPM 
-mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_rm_overscan_"$GRAPHIC_VERSION".py" --pattern NACO --l_max 600 --centre_offset 267 290 --fix_naco_columns >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_rm_overscan_"$GRAPHIC_VERSION".py" --pattern NACO --l_max 512 --centre_offset 267 290 --fix_naco_columns >> $OUTPUT_FILE
 
 # # # Register it with graphic but don't calculate the centre yet. Then sky subtract and remove bad pixels
 mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_naco_register_"$GRAPHIC_VERSION".py" --pattern o_NACO -naco -no_psf >> $OUTPUT_FILE
@@ -93,7 +93,7 @@ mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_naco_regist
 mpirun $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_frame_selection_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_*o_NACO* --centering_nsigma 5 --flux_nsigma 1e6 --psf_width_nsigma 1e6 --debug 3 >> $OUTPUT_FILE
 
 # # # Bin the data (if required)
-mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_recenter_cubes_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_*f* --naxis3 $GRAPHIC_N_TARG --lmax 600 -nofit >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_recenter_cubes_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_*f* --naxis3 $GRAPHIC_N_TARG --lmax 512 -nofit >> $OUTPUT_FILE
 
 # # # Convert the output to the right format for the GRAPHIC PCA and PHISHI
 mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_convert_for_pca.py" --pattern rc --output_dir "../ADI/" >> $OUTPUT_FILE
