@@ -36,7 +36,7 @@ python $GRAPHIC_DIR"GRAPHIC_pca.py" --output_dir "./GRAPHIC_PCA/0.4/" --threads 
 python $GRAPHIC_DIR"GRAPHIC_pca.py" --output_dir "./GRAPHIC_PCA/0.5/" --threads 6 --arc_length 1e4 --n_annuli 24 -median_combine --n_fwhm 0.75 --n_modes 0.5 --min_reference_frames 0.5 --fwhm 4. --r_min 3. --r_max 195. >> $OUTPUT_FILE
 
 # Copy the 0.3 directory as the default reduction
-cp ./GRAPHIC_PCA/0.3/*.fits ./
+cp ./GRAPHIC_PCA/0.3/*.fits ./GRAPHIC_PCA/
 
 # Merge the different reductions into a single cube for display
 python $GRAPHIC_DIR"merge_pca_reductions.py"
