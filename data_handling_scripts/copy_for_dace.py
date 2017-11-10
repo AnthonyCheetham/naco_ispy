@@ -41,8 +41,9 @@ dry_run = args.dry_run
 # Define the directories etc here
 data_folder = '/data/NACO/'
 db_filename = '/data/NACO/obs_table.dat'
-# data_folder='/Users/cheetham/data/naco_data/GTO/'
-# db_filename='/Users/cheetham/data/data_archive/GTO/obs_table.dat'
+print 'Remember to change the db location'
+data_folder='/Users/cheetham/data/naco_data/GTO/'
+db_filename='/Users/cheetham/data/naco_data/GTO/obs_table.dat'
 
 
 
@@ -50,7 +51,7 @@ db_filename = '/data/NACO/obs_table.dat'
 
 ###############
 
-def add_dace_headers(hdr,imaging_type='AGPM'):
+def add_dace_headers(hdr,targ_row):
     ''' Add the necessary keywords to the header of a file so that DACE
     knows how to catalogue it.
     
@@ -64,14 +65,26 @@ def add_dace_headers(hdr,imaging_type='AGPM'):
     
     hdr['HIERARCH DACE INSTRUMENT NAME'] = 'NACO'
     hdr['HIERARCH DACE OBS PROGRAM'] = hdr['HIERARCH ESO OBS PROG ID']
-    hdr['HIERARCH DACE OBS DATE'] = hdr['DATE'].split('T')[0]
-    hdr['HIERARCH DACE OBS RJD'] = hdr['MJD-OBS'] + 0.5 # convert from MJD to Reduced JD
+    hdr['HIERARCH DACE OBS DATE'] = targ_row['Date']
+    hdr['HIERARCH DACE OBS RJD'] = np.round(hdr['MJD-OBS'] + 0.5,2) # convert from MJD to Reduced JD
     hdr['HIERARCH DACE OBJECT NAME'] = name
     hdr['HIERARCH DACE OBJECT RA-DEG'] = hdr['RA']
     hdr['HIERARCH DACE OBJECT DEC-DEG'] = hdr['Dec']
-    hdr['HIERARCH DACE IMAGING TYPE'] = imaging_type
     hdr['HIERARCH DACE IMAGING CALIBRATION'] = ''
     hdr['HIERARCH DACE IMAGING FILTER'] = 'Lp'
+
+    # AGPM or SatPSF?
+    if targ_row['AGPM'] == 'True':
+        imaging_type = 'AGPM'
+    else:
+        imaging_type = 'Saturated PSF'
+    hdr['HIERARCH DACE IMAGING TYPE'] = imaging_type
+
+    # Extra keywords for assessing data quality:
+    hdr['HIERARCH DACE IMAGING FIELD ROTATION'] = np.round(targ_row['FieldRotation'],1)
+    hdr['HIERARCH DACE IMAGING SEEING R0'] = targ_row['r0']
+    hdr['HIERARCH DACE IMAGING SEEING T0'] = targ_row['t0']
+    hdr['HIERARCH DACE IMAGING DIT'] = targ_row['ExpTime']
     
     return hdr
     
@@ -79,14 +92,16 @@ def add_dace_headers(hdr,imaging_type='AGPM'):
     
 ###############
 
-def copy_dataset_for_dace(dir_in, flux_file = 'flux.fits',
+def copy_dataset_for_dace(dir_in, targ_row, flux_file = 'flux.fits',
 #          adi_file = 'GRAPHIC_PCA/smart_annular_pca_derot.fits',
-        adi_file = 'GRAPHIC_PCA/contrast_im.fits',
+        adi_file = 'GRAPHIC_PCA/pca_multimodes.fits',
         contrast_file = 'GRAPHIC_PCA/contrast.txt',
         snr_file = 'GRAPHIC_PCA/snr_map.fits',
         dir_out = ''):
     ''' Copy the final products for a single dataset to a directory accessible 
-    by DACE'''
+    by DACE
+    targ_row is the row from the database containing the target
+    '''
     
     # Check that the files are there    
     flux_exists = os.access(dir_in+flux_file, os.F_OK)
@@ -104,7 +119,7 @@ def copy_dataset_for_dace(dir_in, flux_file = 'flux.fits',
         im,hdr = pf.getdata(dir_in+flux_file,header=True)
         
         # Fix the header
-        hdr = add_dace_headers(hdr)
+        hdr = add_dace_headers(hdr,targ_row)
         
         # Save it out
         pf.writeto(dir_out+'non_saturated.fits',im,header=hdr,clobber=True,
@@ -115,7 +130,7 @@ def copy_dataset_for_dace(dir_in, flux_file = 'flux.fits',
         im,hdr = pf.getdata(dir_in+adi_file,header=True)
         
         # Fix the header
-        hdr = add_dace_headers(hdr)
+        hdr = add_dace_headers(hdr,targ_row)
         
         # Save it out
         pf.writeto(dir_out+'high_contrast.fits',im,header=hdr,clobber=True,
@@ -126,7 +141,7 @@ def copy_dataset_for_dace(dir_in, flux_file = 'flux.fits',
         im,hdr = pf.getdata(dir_in+snr_file,header=True)
         
         # Fix the header
-        hdr = add_dace_headers(hdr)
+        hdr = add_dace_headers(hdr,targ_row)
         
         # Save it out
         pf.writeto(dir_out+'signal_to_noise_map.fits',im,header=hdr,clobber=True,
@@ -178,7 +193,7 @@ for targ_row in data[skip:num]:
             print('target:'+dir_out)
         else:
             print('  Copying from: '+targ_row['Location'])
-            copy_dataset_for_dace(dir_in,dir_out=dir_out)
+            copy_dataset_for_dace(dir_in,targ_row,dir_out=dir_out)
 
 # Find all of the relevant files
 #star='hd15115/'
