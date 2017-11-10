@@ -41,9 +41,8 @@ dry_run = args.dry_run
 # Define the directories etc here
 data_folder = '/data/NACO/'
 db_filename = '/data/NACO/obs_table.dat'
-print 'Remember to change the db location'
-data_folder='/Users/cheetham/data/naco_data/GTO/'
-db_filename='/Users/cheetham/data/naco_data/GTO/obs_table.dat'
+# data_folder='/Users/cheetham/data/naco_data/GTO/'
+# db_filename='/Users/cheetham/data/naco_data/GTO/obs_table.dat'
 
 
 
