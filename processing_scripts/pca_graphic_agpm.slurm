@@ -44,7 +44,7 @@ python $GRAPHIC_DIR"merge_pca_reductions.py"
 
 
 # Now run the detection limits and self-subtraction code
-python $GRAPHIC_DIR"GRAPHIC_contrast_pca_3.3.py" --output_dir "./GRAPHIC_PCA/" --threads 6 --plate_scale 0.027 --median_filter_length 20 --smooth_image_length 1.25 --r_max 299. --n_throughput 10 >> $OUTPUT_FILE
+#python $GRAPHIC_DIR"GRAPHIC_contrast_pca_3.3.py" --output_dir "./GRAPHIC_PCA/" --threads 6 --plate_scale 0.027 --median_filter_length 20 --smooth_image_length 1.25 --r_max 299. --n_throughput 10 >> $OUTPUT_FILE
 
 ### For a small FoV, use r_min = 3, r_max = 51, n_annuli = 6
 ## python $GRAPHIC_DIR"GRAPHIC_pca.py" --output_dir "./GRAPHIC_PCA/" --threads 6 --arc_length 1e4 --n_annuli 6 -median_combine --n_fwhm 0.75 --n_modes 12 --min_reference_frames 15 --fwhm 4. --r_min 3. --r_max 51 >> $OUTPUT_FILE
