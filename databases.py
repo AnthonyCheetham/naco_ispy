@@ -90,12 +90,16 @@ class obs_table(object):
         # Define the columns and column names
         self.columns=('TargetName','Band','AGPM','AnalysisStatus','ConsistentSequence',
                  'FluxProcessed','TargProcessed','ADIProcessed','FieldRotation',
-                 'r0','t0','Location','Date','Time','WindSpeed','ExpTime','SaturationLevel',
+                 'Location','Date','Time',
+                 'r0','r0_sigma','t0','t0_sigma','Seeing','Seeing_sigma','Humidity','Humidity_sigma',
+                 'WindSpeed','ExpTime','SaturationLevel',
                  'PsfXWidth','PsfYWidth','Vmag','Kmag','PsfReference')
         f=np.float64
         self.dtypes=('S40','S20',np.bool_,'S40',np.bool_,
                 np.bool_,np.bool_,np.bool_,f,
-                f,f,'S200','S12','S14',f,f,f,
+                'S200','S12','S12',
+                f,f,f,f,f,f,f,f,
+                f,f,f,
                 f,f,f,f,np.bool_)
                 
         if data_folder[-1] != os.sep:
@@ -159,7 +163,7 @@ class obs_table(object):
             
         # Filter:
         filt1=head['HIERARCH ESO INS OPTI6 ID']
-        if filt1=='L_prime':
+        if filt1=='L_prime' or filt1 == 'M_prime':
             filt=filt1
         else:
             filt=head['HIERARCH ESO INS OPTI5 ID']
@@ -178,7 +182,7 @@ class obs_table(object):
         # And the easy one
         date=Time(head['MJD-OBS']-0.5,format='mjd').iso.split(' ')
         targ_row['Date']=date[0]
-        targ_row['Time']=date[1]
+        targ_row['Time']=date[1][:-4] # the -4 removes the decimal place in the seconds
         
         return targ_row
         
@@ -192,6 +196,8 @@ class obs_table(object):
         r0=np.array([])
         t0=np.array([])
         windspeed=np.array([])
+        seeing = np.array([])
+        humidity = np.array([])
 
         # To save time, only loop over every n files
         # But make sure we read the first and last
@@ -210,19 +216,31 @@ class obs_table(object):
                 print('Error finding ESO ADA POSANG header in: '+f)
                 parangs=0
             r0=np.append(r0,head['HIERARCH ESO AOS RTC DET DST R0MEAN'])
-            t0=np.append(t0,head['HIERARCH ESO AOS RTC DET DST T0MEAN'])
+#            t0=np.append(t0,head['HIERARCH ESO AOS RTC DET DST T0MEAN'])
+            t0=np.append(t0,head['HIERARCH ESO TEL AMBI TAU0']*1000)
             windspeed=np.append(windspeed,head['HIERARCH ESO TEL AMBI WINDSP'])
+            
+            seeing = np.append(seeing,head['HIERARCH ESO TEL AMBI FWHM START'])
+            humidity = np.append(humidity,head['HIERARCH ESO TEL AMBI RHUM'])
         
         # Average and save
         # We need to take care with the parangs in case they wrap.
         #   We can calculate the rotation using parangs and parangs+180 and 
         #   take the min, which works since FieldRotation<180deg
         parangs180=(parangs+180.) % 360.
-        targ_row['FieldRotation']=np.min([np.max(parangs)-np.min(parangs),
-                                    np.max(parangs180)-np.min(parangs180)])
+        targ_row['FieldRotation']=np.round(np.min([np.max(parangs)-np.min(parangs),
+                                    np.max(parangs180)-np.min(parangs180)]),2)
         targ_row['r0']=np.median(r0)
         targ_row['t0']=np.median(t0)
+        targ_row['r0_sigma'] = np.round(np.std(r0),2)
+        targ_row['t0_sigma'] = np.round(np.std(t0),2)
         targ_row['WindSpeed']=np.median(windspeed)
+        
+        targ_row['Seeing'] = np.round(np.median(seeing),2)
+        targ_row['Seeing_sigma'] = np.round(np.std(seeing),2)
+        targ_row['Humidity'] = np.median(humidity)
+        targ_row['Humidity_sigma'] = np.round(np.std(humidity),2)
+        
         
         return targ_row
             
@@ -246,8 +264,8 @@ class obs_table(object):
             psf_ywidths=np.append(psf_ywidths,np.median(np.abs(rdb_info['psf_fit_width_y'])))
 
 
-        targ_row['PsfXWidth']=np.median(psf_xwidths)
-        targ_row['PsfYWidth']=np.median(psf_ywidths)
+        targ_row['PsfXWidth']=np.round(np.median(psf_xwidths),2)
+        targ_row['PsfYWidth']=np.round(np.median(psf_ywidths),2)
         return targ_row
         
     ########################
@@ -307,7 +325,7 @@ class obs_table(object):
             processed_files = glob.glob(targ_dir+'ADI/*.fits')
             if targ_dir+'ADI/flux.fits' in processed_files:
                 targ_row['FluxProcessed']=True
-                # Get the info from the rdb files
+                # Get the info from the rdb filesro
                 rdb_files=sorted(glob.glob(targ_dir+'Flux/cube-info/all_info_framesel*.rdb'))
                 targ_row=self.get_rbd_info(targ_row,rdb_files)
             else:
@@ -448,7 +466,7 @@ class calib_table(obs_table):
 #db=obs_table(data_folder='/Users/cheetham/data/naco_data/GTO/',
 #             filename='/Users/cheetham/data/naco_data/GTO/obs_table.dat')
 #db.create()
-#######
+########
 #db.search(silent=False)
 #db.save()
 #db.data.show_in_browser(jsviewer=True)
