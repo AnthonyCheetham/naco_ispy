@@ -63,7 +63,7 @@ def add_dace_headers(hdr,targ_row):
         name = name.replace(association,' '+association)
     
     hdr['HIERARCH DACE INSTRUMENT NAME'] = 'NACO'
-    hdr['HIERARCH DACE OBS PROGRAM'] = hdr['HIERARCH ESO OBS PROG ID']
+    hdr['HIERARCH DACE OBS PROGRAM'] = 'NACO-ISPY'  #hdr['HIERARCH ESO OBS PROG ID']
     hdr['HIERARCH DACE OBS DATE'] = targ_row['Date']
     hdr['HIERARCH DACE OBS RJD'] = np.round(hdr['MJD-OBS'] + 0.5,2) # convert from MJD to Reduced JD
     hdr['HIERARCH DACE OBJECT NAME'] = name
