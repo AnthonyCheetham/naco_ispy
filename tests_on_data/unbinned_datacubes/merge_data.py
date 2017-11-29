@@ -66,16 +66,32 @@ np.savetxt(parang_out_name,parang_array)
 fits_files = glob.glob(fits_prefix+'*.fits')
 fits_files = np.sort(fits_files)
 
+up_to_ix = 0
+
 for ix,fits_file in enumerate(fits_files):
     
     # Read it
     if ix == 0:
-        cube_out,hdr = pf.getdata(fits_file,header=True)
+        cube,hdr = pf.getdata(fits_file,header=True)
+        
+        # Instead of constantly resizing the array, guess how big it will be and then
+        # remove the extra frames at the end
+        n_frames_est = np.int(len(fits_files)*cube.shape[0]*1.2)
+        cube_out = np.zeros((n_frames_est,cube.shape[1],cube.shape[2]))
     else:
         cube = pf.getdata(fits_file)
+
+    # Quick check that it will fit in the array (could make it adapt the array size if needed)
+    if (up_to_ix+cube.shape[0]) > cube_out.shape[0]:
+        raise Exception('The pre-made output array is too small. Fix merge_data to increase the size')
         
-        cube_out = np.append(cube_out,cube,axis=0)
+    cube_out[up_to_ix:up_to_ix+cube.shape[0]] = cube
+    
+    up_to_ix += cube.shape[0]
         
+# Remove the unneeded frames
+cube_out = cube_out[:up_to_ix]
+
 # Write it out
 fits_save_name = output_dir+'master_cube_PCA.fits'
 pf.writeto(fits_save_name,cube_out,header=hdr,clobber=True)
