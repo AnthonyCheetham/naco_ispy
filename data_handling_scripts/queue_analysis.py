@@ -37,10 +37,10 @@ skip = args.skip
 reprocess = args.reprocess
 queue_script = args.queue_script
 
-#data_folder = '/data/NACO/'
-#db_filename = '/data/NACO/obs_table.dat'
-data_folder='/Users/cheetham/data/naco_data/GTO/'
-db_filename='/Users/cheetham/data/naco_data/GTO/obs_table.dat'
+data_folder = '/data/NACO/'
+db_filename = '/data/NACO/obs_table.dat'
+#data_folder='/Users/cheetham/data/naco_data/GTO/'
+#db_filename='/Users/cheetham/data/naco_data/GTO/obs_table.dat'
 
 scripts_directory = os.path.expanduser('~/code/naco_ispy/processing_scripts/')
         
