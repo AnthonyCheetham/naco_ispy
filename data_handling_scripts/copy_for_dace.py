@@ -91,7 +91,7 @@ def add_dace_headers(hdr,targ_row):
     
 ###############
 
-def copy_dataset_for_dace(dir_in, targ_row, flux_file = 'flux.fits',
+def copy_dataset_for_dace(dir_in, targ_row, flux_file = 'flux_cube.fits',
 #          adi_file = 'GRAPHIC_PCA/smart_annular_pca_derot.fits',
         adi_file = 'GRAPHIC_PCA/pca_multimodes.fits',
         contrast_file = 'GRAPHIC_PCA/contrast.txt',
