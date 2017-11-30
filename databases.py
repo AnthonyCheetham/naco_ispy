@@ -92,14 +92,14 @@ class obs_table(object):
                  'FluxProcessed','TargProcessed','ADIProcessed','FieldRotation',
                  'Location','Date','Time',
                  'r0','r0_sigma','t0','t0_sigma','Seeing','Seeing_sigma','Humidity','Humidity_sigma',
-                 'WindSpeed','ExpTime','SaturationLevel',
+                 'WindSpeed','ExpTime','SaturationLevel','PsfMinmaxRatio','PsfStdRatio',
                  'PsfXWidth','PsfYWidth','Vmag','Kmag','PsfReference')
         f=np.float64
         self.dtypes=('S40','S20',np.bool_,'S40',np.bool_,
                 np.bool_,np.bool_,np.bool_,f,
                 'S200','S12','S12',
                 f,f,f,f,f,f,f,f,
-                f,f,f,
+                f,f,f,f,f,
                 f,f,f,f,np.bool_)
                 
         if data_folder[-1] != os.sep:
@@ -263,10 +263,33 @@ class obs_table(object):
             psf_xwidths=np.append(psf_xwidths,np.median(np.abs(rdb_info['psf_fit_width_x'])))
             psf_ywidths=np.append(psf_ywidths,np.median(np.abs(rdb_info['psf_fit_width_y'])))
 
-
         targ_row['PsfXWidth']=np.round(np.median(psf_xwidths),2)
         targ_row['PsfYWidth']=np.round(np.median(psf_ywidths),2)
         return targ_row
+    
+    ########################
+    
+    def get_psf_info(self,targ_row,):
+        ''' Get some information from the PSF cube.
+        Currently, get the ratio of minimum flux to maximum flux, 
+        and the standard deviation of the flux (as a ratio of the mean flux)
+        Just use the peak...
+        '''
+        
+        # Check that the flux cube exists
+        flux_cube_file = targ_row['Location']+'ADI/flux_cube.fits'
+        if os.access(flux_cube_file,os.F_OK):
+            
+            flux_cube = pf.getdata(flux_cube_file)
+            
+            # Just take the central pixel as a flux measurement
+            flux = flux_cube[:,flux_cube.shape[1]/2,flux_cube.shape[2]/2]
+            
+            targ_row['PsfMinmaxRatio'] = np.round(np.nanmin(flux)/np.nanmax(flux),decimals=3)
+            targ_row['PsfStdRatio'] = np.round(np.nanstd(flux) / np.nanmean(flux),decimals=3)
+        
+        return targ_row
+            
         
     ########################
         
@@ -356,6 +379,9 @@ class obs_table(object):
             
             # Miscellaneous things
             targ_row['Location']=targ_dir
+            
+            # Get some statistics from the PSF cube
+            targ_row = self.get_psf_info(targ_row)
             
             # Check that the sequence is consistent (i.e. all files use the same setup)
             # This is a _very_ slow step (can be >10sec)
@@ -462,7 +488,7 @@ class calib_table(obs_table):
         print 'Astrometric calibrations not implemented'
         
 
-##  Maybe astropy tables are the best way to go?
+##  Code for testing
 #db=obs_table(data_folder='/Users/cheetham/data/naco_data/GTO/',
 #             filename='/Users/cheetham/data/naco_data/GTO/obs_table.dat')
 #db.create()
