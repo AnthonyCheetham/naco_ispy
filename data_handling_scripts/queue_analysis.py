@@ -26,16 +26,21 @@ parser.add_argument('--skip',action="store",  dest="skip", type=int, default=0,
 parser.add_argument('-reprocess',action="store_const",  dest="reprocess", const=True, default=False,
                     help='Ignore whether datasets have already been processed, and launch the reduction anyway')
 
+parser.add_argument('--queue_script', dest="queue_script",action='store',type=str,default=None,
+                    help='Queue this script instead of one of the default options.')
+
+
 # Get the input arguments
 args = parser.parse_args()
 num = args.num
 skip = args.skip
 reprocess = args.reprocess
+queue_script = args.queue_script
 
-data_folder = '/data/NACO/'
-db_filename = '/data/NACO/obs_table.dat'
-#data_folder='/Users/cheetham/data/naco_data/GTO/'
-#db_filename='/Users/cheetham/data/data_archive/GTO/obs_table.dat'
+#data_folder = '/data/NACO/'
+#db_filename = '/data/NACO/obs_table.dat'
+data_folder='/Users/cheetham/data/naco_data/GTO/'
+db_filename='/Users/cheetham/data/naco_data/GTO/obs_table.dat'
 
 scripts_directory = os.path.expanduser('~/code/naco_ispy/processing_scripts/')
         
@@ -80,7 +85,19 @@ for targ_ix,targ_row in enumerate(obs_db.data[skip:num]):
         else:
             consistent = 'False' # Just to make sure it doesnt get processed
             continue
-    
+    elif args.queue_script:
+        # Queue the input script instead
+        ###########
+        # This code should be temporary, and can be used to run once-off scripts
+        process_script = queue_script
+        processed=False
+        
+        # Currently set up for contrast estimation, so need the data to be ADIProcessed
+        if str(targ_row['ADIProcessed']) != 'True':
+            continue
+        
+        ###########
+        
     # Overwrite the processed status if we want to reprocess
     if reprocess:
         processed = False
