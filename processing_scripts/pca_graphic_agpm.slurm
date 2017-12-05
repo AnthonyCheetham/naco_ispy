@@ -36,15 +36,17 @@ python $GRAPHIC_DIR"GRAPHIC_pca.py" --output_dir "./GRAPHIC_PCA/0.2/" --threads 
 python $GRAPHIC_DIR"GRAPHIC_pca.py" --output_dir "./GRAPHIC_PCA/0.4/" --threads 6 --arc_length 1e4 --n_annuli 35 -median_combine --n_fwhm 0.75 --n_modes 0.4 --min_reference_frames 0.4 --fwhm 4. --r_min 3. --r_max 299. >> $OUTPUT_FILE
 python $GRAPHIC_DIR"GRAPHIC_pca.py" --output_dir "./GRAPHIC_PCA/0.5/" --threads 6 --arc_length 1e4 --n_annuli 35 -median_combine --n_fwhm 0.75 --n_modes 0.5 --min_reference_frames 0.5 --fwhm 4. --r_min 3. --r_max 299. >> $OUTPUT_FILE
 
+# Run cADI
+# python $GRAPHIC_DIR"GRAPHIC_pca.py" --output_dir "./GRAPHIC_PCA/cADI/" --pca_type "cadi" -median_combine --threads 6 >> $OUTPUT_FILE
+
 # Copy the 0.3 reduction into GRAPHIC_PCA as the "default" reduction to use for the contrast curves
 cp ./GRAPHIC_PCA/0.3/*.fits ./GRAPHIC_PCA/
 
 # Merge the different reductions into a single cube for display
 python $GRAPHIC_DIR"merge_pca_reductions.py"
 
-
 # Now run the detection limits and self-subtraction code
-#python $GRAPHIC_DIR"GRAPHIC_contrast_pca_3.3.py" --output_dir "./GRAPHIC_PCA/" --threads 6 --plate_scale 0.027 --median_filter_length 20 --smooth_image_length 1.25 --r_max 299. --n_throughput 10 >> $OUTPUT_FILE
+python $GRAPHIC_DIR"GRAPHIC_contrast_pca_3.3.py" --output_dir "./GRAPHIC_PCA/" --threads 6 --plate_scale 0.027 --median_filter_length 20 --smooth_image_length 1.25 --r_max 299. --n_throughput 10 >> $OUTPUT_FILE
 
 ### For a small FoV, use r_min = 3, r_max = 51, n_annuli = 6
 ## python $GRAPHIC_DIR"GRAPHIC_pca.py" --output_dir "./GRAPHIC_PCA/" --threads 6 --arc_length 1e4 --n_annuli 6 -median_combine --n_fwhm 0.75 --n_modes 12 --min_reference_frames 15 --fwhm 4. --r_min 3. --r_max 51 >> $OUTPUT_FILE
