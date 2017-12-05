@@ -153,8 +153,8 @@ def copy_dataset_for_dace(dir_in, targ_row, flux_file = 'flux_cube.fits',
         sep,con = np.loadtxt(dir_in+contrast_file)
         
         # Remove any NaNs
-        sep[np.isnan(con) == False]
-        con[np.isnan(con) == False]
+        sep = sep[np.isnan(con) == False]
+        con = con[np.isnan(con) == False]
         
         # If there are no values left, print an error
         if len(con) == 0:
