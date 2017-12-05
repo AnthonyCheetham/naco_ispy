@@ -152,11 +152,20 @@ def copy_dataset_for_dace(dir_in, targ_row, flux_file = 'flux_cube.fits',
         # Load it
         sep,con = np.loadtxt(dir_in+contrast_file)
         
-        # convert to rdb
-        data={'Separation':sep,'Contrast':con}
-        tab = table.Table(data,names=['Separation','Contrast'])
+        # Remove any NaNs
+        sep[np.isnan(con) == False]
+        con[np.isnan(con) == False]
         
-        tab.write(dir_out+'detection_limits.rdb',format='rdb')
+        # If there are no values left, print an error
+        if len(con) == 0:
+            print('    Contrast curve is only NaNs! Not copied...')
+        else:
+            
+            # convert to rdb
+            data={'Separation':sep,'Contrast':con}
+            tab = table.Table(data,names=['Separation','Contrast'])
+            
+            tab.write(dir_out+'detection_limits.rdb',format='rdb')
     print('    '+str(flux_exists)+' '+str(adi_exists)+' '+str(snr_exists)+' '+str(contrast_exists))
 
 ###############
