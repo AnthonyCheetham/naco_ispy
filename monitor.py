@@ -88,6 +88,7 @@ def detect_filetype(hdr,get_folder_string=False):
 #    type_cat = hdr['HIERARCH ESO DPR CATG']
     expt=hdr['EXPTIME'] # exposure time.
     agpm=hdr['HIERARCH ESO INS OPTI1 ID'] # this is AGPM if it is used
+    date = Time(hdr['DATE-OBS']) # date of exposure
     try:
         targ_name=hdr['HIERARCH ESO OBS NAME']
     except:
@@ -119,7 +120,13 @@ def detect_filetype(hdr,get_folder_string=False):
     
         # Handle the AGPM and non-AGPM cases differently
         if agpm=='AGPM':
-            if nexpo > nexpo_limit:
+            
+            # In old data, sky frames had TYPE = "OBJECT" and NEXP = 1
+            # Until October 2017, sky frames had TYPE = "SKY" and NEXP >1
+            # Since October 2017, sky frames have TYPE = "SKY" and some targ frames have NEXP=1
+            # So we need to put date-dependent logic in here since this function
+            #   is also used in the data handling pipeline.
+            if (nexpo > nexpo_limit) or ((date >Time('2017-10-01')) and (naxis1 > 300)):
                 obstype='Target_AGPM'
                 folder_string='Targ'
             elif (expt < obstime_limits[1]) and (expt > obstime_limits[0]) and (naxis1 >512):
