@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import astropy.io.fits as pf
 import os
-from naco_reduction import companion_fitting
+import graphic_companion_fitting_lib
 import graphic_contrast_lib
 from scipy import interpolate
 
@@ -23,7 +23,7 @@ image_name = 'smart_annular_pca_derot.fits'
 psf_name = 'flux.fits'
 tp_name = 'throughput.txt'
 
-plate_scale = 0.027 # arcsec/pix
+plate_scale = 0.0272 # arcsec/pix
 
 print('Using plate scale of: '+str(plate_scale*1000)+' mas/pix')
 
@@ -81,7 +81,7 @@ def onclick(event):
     coords = [event.xdata,event.ydata]
     coords = np.round(coords).astype(int) # round
     
-    cutout_rad = 4
+    cutout_rad = 6
     
     # Cut down the psf frame
     psf_cut = psf[psf.shape[0]/2-cutout_rad:psf.shape[0]/2+cutout_rad,
@@ -100,7 +100,7 @@ def onclick(event):
 #    results = companion_fitting.companion_mcmc(im,psf,initial_guess,image_err=1.,n_walkers=50.,n_iterations=1e3,
 #                   threads=3,plot=False,burn_in=200)
     
-    result = companion_fitting.companion_leastsq(cutout,psf_cut,initial_guess,
+    result = graphic_companion_fitting_lib.simple_companion_leastsq(cutout,psf_cut,initial_guess,
              image_err=1.,threads=3,
              plot=False,method='Powell',fit_to_stdev=False)
     
@@ -138,7 +138,7 @@ def onclick(event):
     print('  Sep:'+str(sep),'PA:'+str(pa),'Contrast:'+str(contrast))
     
     # Make a residual image for display
-    resids = companion_fitting.companion_resids(result.x, cutout, psf_cut)
+    resids = graphic_companion_fitting_lib.simple_companion_resids(result.x, cutout, psf_cut)
     
     cmax = np.max(np.abs(cutout))
     
@@ -157,6 +157,7 @@ def onclick(event):
 
     plt.show()
 
+print('Click on a companion to fit to its position')
 print('Exit all plot windows to finish')
 
 # Set up the plot
