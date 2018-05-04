@@ -29,6 +29,7 @@ cd Sky
 mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_naco_agpm_offset_"$GRAPHIC_VERSION".py" --pattern sky-num/med1  >> $OUTPUT_FILE
 cd ..
 cd Targ
+rm cube-info/all_info_*.rdb # delete the o_ info files and create new ones
 rm rc_*.fits
 mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_naco_agpm_register_"$GRAPHIC_VERSION".py" --pattern nomed  >> $OUTPUT_FILE
 mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_recenter_cubes_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_ --naxis3 $N_TARG --lmax 600  >> $OUTPUT_FILE
