@@ -47,7 +47,7 @@ Known bugs:
 #  The combination of the infinite loop and the plt.tight_layout() call (as well as the 
 #  plt.show() and plt.pause() calls) causes problems with the macosx backend
 import matplotlib as mpl
-mpl.use('TkAgg') # if this doesn't work, try the next line instead
+# mpl.use('TkAgg') # if this doesn't work, try the next line instead
 #mpl.use('QT4Agg')
 
 import numpy as np
@@ -168,7 +168,7 @@ def detect_filetype(hdr,get_folder_string=False):
         folder_string='Dark'
     else:
         # Put all of the unknown file types into a single folder to make it easy
-        print 'Unrecognised DPR type:',type_flag
+        print('Unrecognised DPR type:'+type_flag)
         obstype='Unknown'
         folder_string='Uncategorized'
         
@@ -317,8 +317,8 @@ def run_and_process(folder='./',prefix='NACO',suffix='.fits',
         - new_only: if True, it will ignore files that already exist in a folder
              and only display the statistics of new files.
         '''
-    print 'Monitoring folder:',folder
-    print 'Press ctrl+c to exit'
+    print('Monitoring folder:'+folder)
+    print('Press ctrl+c to exit')
     
     # Make sure the / is included in the filename
     if folder[-1]!='/':
@@ -369,7 +369,7 @@ def run_and_process(folder='./',prefix='NACO',suffix='.fits',
             new_files=list(set(files)-set(known_files))
             n_new=len(new_files)
             if nfiles ==0 and repeats ==0:
-                print 'No files found'
+                print('No files found')
                 time.sleep(pause_interval)
             elif n_new >0:
                 pass
