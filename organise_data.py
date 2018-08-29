@@ -104,7 +104,11 @@ def organise_data(folder,prefix='NACO',suffix='.fits',dry_run=True,
         mjd=hdr['MJD-OBS']
         science_flag=hdr['HIERARCH ESO DPR CATG']
                 
-        obstype,folder_string=detect_filetype(hdr,get_folder_string=True)
+        try:
+            obstype,folder_string=detect_filetype(hdr,get_folder_string=True)
+        except:
+            print('Problem sorting file:'+str(filename))
+            raise Exception
         
         # Get the date in a nice format and convert so that observations made in
         #  the same night have the same date.
