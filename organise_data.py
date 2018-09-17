@@ -155,10 +155,13 @@ def organise_data(folder,prefix='NACO',suffix='.fits',dry_run=True,
 ###############   
 
 def copy_from_archive(archive_folder,save_folder,filename_list='copied_files.txt',
-                      prefix='NACO',suffix='.fits',dry_run=True,silent=False):
+                      prefix='NACO',suffix='.fits',datestring='',dry_run=True,silent=False):
     ''' Script to be ran that copies files from the archive machine to the working
     directory where the data reduction takes place.
     It tracks the files that have been copied, so that it can be run at any time.
+
+    datestring: Can set to e.g. 2018 to only try to copy 2018 data. Default is to try
+        to copy everything
     '''
     
     # Load the list of already copied files
@@ -171,7 +174,7 @@ def copy_from_archive(archive_folder,save_folder,filename_list='copied_files.txt
     ncopied=0
     
     # Find the files in the archive
-    all_files=glob.glob(archive_folder+'*/'+prefix+'*'+suffix)
+    all_files=glob.glob(archive_folder+datestring+'*/'+prefix+'*'+suffix)
     
     # Loop through the files to work out what to do with them
     for filename in all_files:
