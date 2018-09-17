@@ -244,7 +244,7 @@ def diagnostic_plots(axes,capture_time,peakcounts,bgflux,parangs,clean_im):
     # For now, just plot the image (should be x and y position in the future)
     ax4.cla()
     try:
-        ax4.imshow(clean_im)
+        ax4.imshow(clean_im,origin='lowerleft')
         ax4.colorbar()
     except:
         pass
