@@ -60,9 +60,12 @@ for targ_ix,targ_row in enumerate(obs_db.data[skip:num]):
             os.chdir(main_dir)
         
         if args.targ:
-            os.chdir('Targ')
-            subprocess.call(cmd,shell=True)
-            os.chdir(main_dir)
+            try:
+                os.chdir('Sky')
+                subprocess.call(cmd,shell=True)
+                os.chdir(main_dir)
+            except:
+                print('Sky directory not accessible')
             
             # Do Sky as well if the target has AGPM
             if str(targ_row['AGPM']) == 'True':
