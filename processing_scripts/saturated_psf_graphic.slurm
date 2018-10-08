@@ -70,13 +70,13 @@ rm cube-info/all_info*nomed*.rdb
 mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_register_"$GRAPHIC_VERSION".py" --pattern nomed_ -naco -saturated >> $OUTPUT_FILE
 
 # # # # # Perform frame selection:
-mpirun $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_frame_selection_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_*nomed -dithered --centering_nsigma 5 --flux_nsigma 5 --psf_width_nsigma 5 >> $OUTPUT_FILE
+python $GRAPHIC_DIR"GRAPHIC_frame_selection_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_*nomed -dithered --centering_nsigma 5 --flux_nsigma 5 --psf_width_nsigma 5 >> $OUTPUT_FILE
 
 # # # # Bin the data into 1 file
 mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_recenter_cubes_"$GRAPHIC_VERSION".py" --pattern nomed --info_pattern "all_info_framesel*nomed*" --naxis3 $GRAPHIC_N_TARG --lmax 512 >> $OUTPUT_FILE
 
 # # # Convert the output to the right format for the GRAPHIC PCA and PHISHI
-mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_convert_for_pca.py" --pattern rc --output_dir "../ADI/" >> $OUTPUT_FILE
+python $GRAPHIC_DIR"GRAPHIC_convert_for_pca.py" --pattern rc --output_dir "../ADI/" >> $OUTPUT_FILE
 
 
 cd ..
