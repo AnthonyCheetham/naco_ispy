@@ -20,14 +20,8 @@
 
 GRAPHIC_VERSION="3.3"
 
-# GRAPHIC_DIR="/obs/sphere/GRAPHIC/production/graphic_git/"$GRAPHIC_VERSION"/"
-# GRAPHIC_DIR="/home/spectro/cheetham/code/graphic_git/"$GRAPHIC_VERSION"/"
-# GRAPHIC_DIR="/Users/cheetham/code/graphic_git/"$GRAPHIC_VERSION"/"
-
 # In case we need to add any command line options to mpirun
 GRAPHIC_OPTIONS=""
-
-# PHISI_DIR="/Users/cheetham/code/phishi/"
 
 # Number of processors used to run GRAPHIC
 GRAPHIC_N_CORES="" #for running on a cluster
@@ -94,8 +88,8 @@ mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_pca_sky_sub
 mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_naco_agpm_register_"$GRAPHIC_VERSION".py" --pattern nomed  >> $OUTPUT_FILE
 
 # # Run frame selection on the data
-# # python $GRAPHIC_DIR"GRAPHIC_frame_selection_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_*nomed* --centering_nsigma 5 --flux_nsigma 1e6 --psf_width_nsigma 1e6 --debug 3 >> $OUTPUT_FILE
-python $GRAPHIC_DIR"GRAPHIC_frame_selection_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_*o_NACO* --centering_nsigma 5 --flux_nsigma 1e6 --psf_width_nsigma 1e6 --debug 3 >> $OUTPUT_FILE
+python $GRAPHIC_DIR"GRAPHIC_frame_selection_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_*nomed* --centering_nsigma 5 --flux_nsigma 1e6 --psf_width_nsigma 1e6 --debug 3 >> $OUTPUT_FILE
+# # python $GRAPHIC_DIR"GRAPHIC_frame_selection_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_*o_NACO* --centering_nsigma 5 --flux_nsigma 1e6 --psf_width_nsigma 1e6 --debug 3 >> $OUTPUT_FILE
 
 # # # Bin the data (if required)
 mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_recenter_cubes_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_*f* --naxis3 $GRAPHIC_N_TARG --lmax 600 >> $OUTPUT_FILE
