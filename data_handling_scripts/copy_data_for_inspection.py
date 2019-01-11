@@ -50,7 +50,7 @@ for d in dirs:
     
     # Copy the files
     for f in ['master_cube_PCA.fits','flux.fits','GRAPHIC_PCA/pca_multimodes.fits',
-              'GRAPHIC_PCA/snr_map.fits','GRAPHIC_PCA/contrast.txt']:
+              'GRAPHIC_PCA/snr_map.fits','GRAPHIC_PCA/contrast.txt','parallactic_angle.txt']:
         
         fname = d+f
         file_exists=os.access(fname, os.F_OK)    
