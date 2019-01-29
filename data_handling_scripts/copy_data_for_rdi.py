@@ -20,11 +20,12 @@ import subprocess
 
 
 data_dir = '/data/NACO/Science/'
-data_dir = '/Users/cheetham/data/naco_data/GTO/Science/'
+save_dir = '/home/spectro/cheetham/tmp/rdi_cubes/'
+
+#data_dir = '/Users/cheetham/data/naco_data/GTO/Science/'
+#save_dir = '/Users/cheetham/tmp/rdi_cubes/'
 
 dirs = glob.glob(data_dir+'*/*/ADI/')
-
-save_dir = '/Users/cheetham/tmp/rdi_cubes/'
 
 output_radius = 25 # so a 50x50 image
 
