@@ -59,7 +59,7 @@ def add_dace_headers(hdr,targ_row):
 
     # Fix the name of some association members
     name = hdr['HIERARCH ESO OBS TARG NAME']
-    for association in ['Sco','Oph','Hya','Sgr','Cen','Tau','Aur','CrA']:
+    for association in ['Sco','Oph','Hya','Sgr','Cen','Tau','Aur','CrA','Lup']:
         name = name.replace(association,' '+association)
     
     hdr['HIERARCH DACE INSTRUMENT NAME'] = 'NACO'
