@@ -17,17 +17,20 @@ import astropy.io.fits as pf
 import glob
 import os
 import subprocess
+from astropy.table import Table
 
 
 data_dir = '/data/NACO/Science/'
 save_dir = '/home/spectro/cheetham/tmp/rdi_cubes/'
 
-#data_dir = '/Users/cheetham/data/naco_data/GTO/Science/'
-#save_dir = '/Users/cheetham/tmp/rdi_cubes/'
+data_dir = '/Users/cheetham/data/naco_data/GTO/Science/'
+save_dir = '/Users/cheetham/tmp/rdi_cubes/'
 
 dirs = glob.glob(data_dir+'*/*/ADI/')
 
 output_radius = 25 # so a 50x50 image
+
+info_table=Table(names=['MJD','Airmass','Seeing','r0','t0','WindSpeed','Humidity'])
 
 # Loop through directories
 for wdir in dirs:
@@ -50,17 +53,44 @@ for wdir in dirs:
         
         targname = hdr['ESO OBS TARG NAME']
         targdate = hdr['DATE-OBS'].split('T')[0].replace('-','-')
+
+        # Remove any frames that are entirely NaNs:
+        good_frames = np.count_nonzero(~np.isnan(im),axis=(1,2)) > 1
         
         # Save them
         outname = save_dir+targname+'_'+targdate+'.fits'
-        try:
-            pf.writeto(outname,im,header=hdr,overwrite=True)
-        except:
-            pf.writeto(outname,im,header=hdr,clobber=True)
+#        pf.writeto(outname,im[good_frames],header=hdr,overwrite=True)
+        hdu1 = pf.PrimaryHDU(data=im[good_frames],header=hdr)
+
         # Add the parangs as a second extension
         header2 = pf.Header()
         header2['UNIT'] = 'degrees'
-        hdulist = pf.append(outname,parangs,header2)
+#        hdulist = pf.append(outname,parangs[good_frames],header2)
+        hdu2 = pf.ImageHDU(data=parangs[good_frames],header=header2,name='Parangs')
+
+        # Also get some info from the headers of each of the files
+        individual_files = glob.glob(wdir+'../Targ/nomed*.fits')
+        for frame_ix,f in enumerate(individual_files):
+            if good_frames[frame_ix]:
+
+                head =  pf.getheader(f)
+
+                mjd = head['MJD-OBS']
+                airmass = head['AIRMASS']
+                seeing = head['HIERARCH ESO TEL AMBI FWHM START']
+                r0 = head['HIERARCH ESO AOS RTC DET DST R0MEAN']
+                t0 = head['HIERARCH ESO TEL AMBI TAU0']*1000
+                windspeed = head['HIERARCH ESO TEL AMBI WINDSP']
+                humidity = head['HIERARCH ESO TEL AMBI RHUM']
+
+                info_table.add_row([mjd,airmass,seeing,r0,t0,windspeed,humidity])
+
+        # Now add it to the file
+#        pf.append(outname,info_table)
+        hdu3 = pf.BinTableHDU(data=info_table,name='SequenceInfo')
+        
+        hdulist = pf.HDUList(hdus=[hdu1,hdu2,hdu3])
+        hdulist.writeto(outname,overwrite=True)
         
         print(wdir)
     else:
