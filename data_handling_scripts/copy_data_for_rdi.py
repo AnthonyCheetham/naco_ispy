@@ -30,8 +30,6 @@ dirs = glob.glob(data_dir+'*/*/ADI/')
 
 output_radius = 25 # so a 50x50 image
 
-info_table=Table(names=['MJD','Airmass','Seeing','r0','t0','WindSpeed','Humidity'])
-
 # Loop through directories
 for wdir in dirs:
     
@@ -69,6 +67,8 @@ for wdir in dirs:
         hdu2 = pf.ImageHDU(data=parangs[good_frames],header=header2,name='Parangs')
 
         # Also get some info from the headers of each of the files
+        info_table=Table(names=['MJD','Airmass','Seeing','r0','t0','WindSpeed','Humidity'])
+        
         individual_files = glob.glob(wdir+'../Targ/nomed*.fits')
         for frame_ix,f in enumerate(individual_files):
             if good_frames[frame_ix]:
