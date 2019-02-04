@@ -19,7 +19,6 @@ import os
 import subprocess
 from astropy.table import Table
 
-
 data_dir = '/data/NACO/Science/'
 save_dir = '/home/spectro/cheetham/tmp/rdi_cubes/'
 
@@ -57,22 +56,29 @@ for wdir in dirs:
         
         # Save them
         outname = save_dir+targname+'_'+targdate+'.fits'
-#        pf.writeto(outname,im[good_frames],header=hdr,overwrite=True)
         hdu1 = pf.PrimaryHDU(data=im[good_frames],header=hdr)
 
         # Add the parangs as a second extension
         header2 = pf.Header()
         header2['UNIT'] = 'degrees'
-#        hdulist = pf.append(outname,parangs[good_frames],header2)
         hdu2 = pf.ImageHDU(data=parangs[good_frames],header=header2,name='Parangs')
 
         # Also get some info from the headers of each of the files
         info_table=Table(names=['MJD','Airmass','Seeing','r0','t0','WindSpeed','Humidity'])
-        
-        individual_files = glob.glob(wdir+'../Targ/nomed*.fits')
-        for frame_ix,f in enumerate(individual_files):
-            if good_frames[frame_ix]:
 
+        # By looping over good_frames, we take the first len(good_frames) files
+        # If some frames were removed already, we will take the wrong files but it
+        # should be close enough for this purpose
+        
+        # This could be fixed by removing one file at a time and minimizing the 
+        # total difference between the calculated and final parangs (since they wont be exactly the same)
+        # But would need to use sum(diff) or sum(diff**0.5) to make sure the outliers
+        # don't dominate the fit and cause a compromise fit to be the best.
+        individual_files = glob.glob(wdir+'../Targ/NACO*.fits')
+        for frame_ix,frame_is_good in enumerate(good_frames):
+            if frame_is_good:
+
+                f = individual_files[frame_ix]
                 head =  pf.getheader(f)
 
                 mjd = head['MJD-OBS']
@@ -86,8 +92,11 @@ for wdir in dirs:
                 info_table.add_row([mjd,airmass,seeing,r0,t0,windspeed,humidity])
 
         # Now add it to the file
-#        pf.append(outname,info_table)
         hdu3 = pf.BinTableHDU(data=info_table,name='SequenceInfo')
+
+        # Check that it all makes sense
+        if hdu1.data.shape[0] != hdu3.data.size:
+             print('  Some frames are missing!')
         
         hdulist = pf.HDUList(hdus=[hdu1,hdu2,hdu3])
         hdulist.writeto(outname,overwrite=True)
