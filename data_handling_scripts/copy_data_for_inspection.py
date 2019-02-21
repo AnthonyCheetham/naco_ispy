@@ -24,9 +24,6 @@ parser.add_argument('--target_pattern', action="store", dest="target_pattern",  
 parser.add_argument('--output_dir', action="store", dest="output_dir",  default="/home/spectro/cheetham/tmp/inspection/", 
                     help='The directory to save the files')
 
-#parser.add_argument('-', dest='', action='store_const', const=True, 
-#                    default=False, help='')
-
 args = parser.parse_args()
 
 data_dir = args.data_dir
@@ -36,6 +33,7 @@ output_dir = args.output_dir
 
 # Find the relevant directories
 dirs = glob.glob(data_dir+date_pattern+'/'+target_pattern+'/ADI/')
+print('Found '+str(len(dirs))+' matching datasets')
 
 # Loop through them
 for d in dirs:
@@ -60,3 +58,4 @@ for d in dirs:
         else:
             print('Didnt find '+f+' for target '+targname)
             print('  '+fname)
+            
