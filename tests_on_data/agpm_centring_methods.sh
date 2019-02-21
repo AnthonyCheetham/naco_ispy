@@ -9,7 +9,7 @@ N_TARG="$(ls -l Targ/NACO*.fits | wc -l)"
 cd Targ
 rm cube-info/all_info_*.rdb # delete the o_ info files and create new ones
 rm rc_*.fits
-mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_register_"$GRAPHIC_VERSION".py" --pattern o_ -naco -remove_striping --search_region 50 >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_register_"$GRAPHIC_VERSION".py" --pattern o_ -naco -remove_striping --search_region 60 >> $OUTPUT_FILE
 mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_recenter_cubes_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_ --naxis3 $N_TARG --lmax 600  >> $OUTPUT_FILE
 mpirun python $GRAPHIC_DIR"GRAPHIC_convert_for_pca.py" --pattern rc --output_dir "../ADI_old_agpm/"  >> $OUTPUT_FILE
 cd ..
@@ -18,7 +18,7 @@ cd ..
 cd Targ
 rm cube-info/all_info_*.rdb # delete the o_ info files and create new ones
 rm rc_*.fits
-mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_register_"$GRAPHIC_VERSION".py" --pattern nomed_ -naco -agpm_centre --search_region 50 >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_register_"$GRAPHIC_VERSION".py" --pattern nomed_ -naco -agpm_centre --search_region 60 >> $OUTPUT_FILE
 mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_recenter_cubes_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_ --naxis3 $N_TARG --lmax 600  >> $OUTPUT_FILE
 mpirun python $GRAPHIC_DIR"GRAPHIC_convert_for_pca.py" --pattern rc --output_dir "../ADI_old_gauss/"  >> $OUTPUT_FILE
 cd ..
