@@ -92,7 +92,7 @@ python $GRAPHIC_DIR"GRAPHIC_frame_selection_"$GRAPHIC_VERSION".py" --pattern nom
 # # python $GRAPHIC_DIR"GRAPHIC_frame_selection_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_*o_NACO* --centering_nsigma 5 --flux_nsigma 1e6 --psf_width_nsigma 1e6 --debug 3 >> $OUTPUT_FILE
 
 # # # Bin the data (if required)
-mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_recenter_cubes_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_*f* --naxis3 $GRAPHIC_N_TARG --lmax 600 >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_recenter_cubes_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_*f* --naxis3 $GRAPHIC_N_TARG --lmax 600 >> $OUTPUT_FILE
 
 # # # Convert the output to the right format for the GRAPHIC PCA and PHISHI
 python $GRAPHIC_DIR"GRAPHIC_convert_for_pca.py" --pattern rc --output_dir "../ADI/" >> $OUTPUT_FILE
