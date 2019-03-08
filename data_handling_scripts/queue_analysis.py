@@ -17,6 +17,8 @@ parser.add_argument('-targ', dest="targ",action='store_const',const=True,
                     default=False, help='Process target (agpm or saturated psf) data')    
 parser.add_argument('-pca', dest="pca",action='store_const',const=True,
                     default=False, help='Run PCA on the datasets')    
+parser.add_argument('-dicpm', dest="dicpm",action='store_const',const=True,
+                    default=False, help='Run DICPM on the datasets')    
 parser.add_argument('-dry_run', dest="dry_run",action='store_const',const=True,
                     default=False, help='Dont actually queue the analysis, but print the commands it will do')    
 parser.add_argument('--num', action="store",  dest="num", type=int, default=None,
@@ -85,6 +87,25 @@ for targ_ix,targ_row in enumerate(obs_db.data[skip:num]):
         else:
             consistent = 'False' # Just to make sure it doesnt get processed
             continue
+
+    elif args.dicpm:
+        # Process using Matthias' DICPM pipeline
+        # Check that it is ready
+        targ_processed = targ_row['TargProcessed']
+        flux_processed = targ_row['FluxProcessed']
+        
+        if str(targ_processed) == 'True' and str(flux_processed) == 'True':
+            
+            # If the targ and flux have already been processed, we dont need to worry about consistency
+            consistent = 'True'
+            
+            process_script = scripts_directory+'dicpm_reduction.slurm'
+            processed = 'False'
+        else:
+            consistent = 'False' # Just to make sure it doesnt get processed
+            processed = 'True' # Just to make sure it doesnt get processed
+            continue
+
     elif args.queue_script:
         # Queue the input script instead
         ###########
