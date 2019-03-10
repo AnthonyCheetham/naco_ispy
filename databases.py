@@ -92,14 +92,14 @@ class obs_table(object):
                  'FluxProcessed','TargProcessed','ADIProcessed','FieldRotation',
                  'Location','Date','Time',
                  'r0','r0_sigma','t0','t0_sigma','Seeing','Seeing_sigma','Humidity','Humidity_sigma',
-                 'WindSpeed','ExpTime','SaturationLevel','PsfMinmaxRatio','PsfStdRatio',
+                 'WindSpeed','ExpTime','TotalExpTime','SaturationLevel','PsfMinmaxRatio','PsfStdRatio',
                  'PsfXWidth','PsfYWidth','Vmag','Kmag','PsfReference')
         f=np.float64
         self.dtypes=('S40','S20',np.bool_,'S40',np.bool_,
                 np.bool_,np.bool_,np.bool_,f,
                 'S200','S12','S12',
                 f,f,f,f,f,f,f,f,
-                f,f,f,f,f,
+                f,f,f,f,f,f,
                 f,f,f,f,np.bool_)
                 
         if data_folder[-1] != os.sep:
@@ -198,6 +198,8 @@ class obs_table(object):
         windspeed=np.array([])
         seeing = np.array([])
         humidity = np.array([])
+        ndit = np.array([])
+        dit = np.array([])
 
         # To save time, only loop over every n files
         # But make sure we read the first and last
@@ -222,6 +224,10 @@ class obs_table(object):
             
             seeing = np.append(seeing,head['HIERARCH ESO TEL AMBI FWHM START'])
             humidity = np.append(humidity,head['HIERARCH ESO TEL AMBI RHUM'])
+            
+            # First and last frame are removed by GRAPHIC, so subtract 2
+            ndit = np.append(ndit,head['NAXIS3']-2)
+            dit = np.append(dit,head['HIERARCH ESO DET DIT'])
         
         # Average and save
         # We need to take care with the parangs in case they wrap.
@@ -240,6 +246,8 @@ class obs_table(object):
         targ_row['Seeing_sigma'] = np.round(np.std(seeing),2)
         targ_row['Humidity'] = np.median(humidity)
         targ_row['Humidity_sigma'] = np.round(np.std(humidity),2)
+        
+        targ_row['TotalExpTime'] = np.median(ndit*dit)*len(targ_files)
         
         
         return targ_row
