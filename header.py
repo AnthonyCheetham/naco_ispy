@@ -63,7 +63,8 @@ def get_info_from_files(files,keys_dict,wdir=''):
         hdr = pf.getheader(fname,ext=0)
         try:
             hdr2 = pf.getheader(fname,ext=1)
-            hdr = hdr2+hdr
+            if hdr2['EXTNAME'].strip() != 'MVCO': # We don't want the AO covariance matrix header...
+                hdr = hdr2+hdr
         except:
             pass
         
