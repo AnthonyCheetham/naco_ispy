@@ -120,7 +120,7 @@ def detect_filetype(hdr,get_folder_string=False):
 
         # Handle Ks data first since the rules are different
         if hdr['HIERARCH ESO INS OPTI6 ID'] == 'Ks':
-            if nexpo > 1:
+            if hdr['HIERARCH ESO INS OPTI3 ID'] == 'Full':
                 obstype='Target_saturated'
                 folder_string = 'Targ'
             else:
