@@ -126,7 +126,7 @@ class obs_table(object):
     def save(self):
         ''' Save changes to the table to disk'''
         print 'Saving table as',self.filename
-        self.data.write(self.filename,format=self.table_format)
+        self.data.write(self.filename,format=self.table_format,overwrite=True)
         
     ########################
         
