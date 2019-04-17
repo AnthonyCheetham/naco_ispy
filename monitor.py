@@ -117,6 +117,15 @@ def detect_filetype(hdr,get_folder_string=False):
         # There are no separate skies for non-AGPM observations, so label them all as Targ.
         # 
         # For the flux, the only way to guess is the exposure time (or possibly the ND?)
+
+        # Handle Ks data first since the rules are different
+        if hdr['HIERARCH ESO INS OPTI6 ID'] == 'Ks':
+            if nexpo > 1:
+                obstype='Target_saturated'
+                folder_string = 'Targ'
+            else:
+                obstype='Flux'
+                folder_string = 'Flux'
     
         # Handle the AGPM and non-AGPM cases differently
         if agpm=='AGPM':
