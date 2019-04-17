@@ -128,7 +128,7 @@ def detect_filetype(hdr,get_folder_string=False):
                 folder_string = 'Flux'
     
         # Handle the AGPM and non-AGPM cases differently
-        if agpm=='AGPM':
+        elif agpm=='AGPM':
             
             # In old data, sky frames had TYPE = "OBJECT" and NEXP = 1
             # Until October 2017, sky frames had TYPE = "SKY" and NEXP >1
