@@ -163,7 +163,7 @@ class obs_table(object):
             
         # Filter:
         filt1=head['HIERARCH ESO INS OPTI6 ID']
-        if filt1=='L_prime' or filt1 == 'M_prime':
+        if filt1=='L_prime' or filt1 == 'M_prime' or filt1 == 'Ks':
             filt=filt1
         else:
             filt=head['HIERARCH ESO INS OPTI5 ID']
