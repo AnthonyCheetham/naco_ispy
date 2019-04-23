@@ -26,9 +26,10 @@ used_instrument = Instrument(
 reduction_parameters = Reduction_parameters(
     search_region=None,  # if None the search region is defined by the following two parameters, otherwise a boolean mask defining the search region can be given here
     search_region_inner_bound=2,  # inner radius in pixels
-    search_region_outer_bound=40, # 40  # outer radius in pixels
+    search_region_outer_bound=40, # outer radius in pixels
     oversampling=1,
-    data_crop_size=120,
+    data_auto_crop = True,
+    data_crop_size=200,
     right_handed=False,  # Rotation durection (naco==False, sphere==true, lbt==??)
     # known_companion_position=None,  # [-33.1, -14.46] coordinates in pixels, to exclude known object from the model
     use_multiprocess=True,
@@ -48,9 +49,10 @@ reduction_parameters = Reduction_parameters(
     scaling='temp-median',  # Scaling of pca training set: alternative temp-quartile
     annulus_width=9,  # in pixels
     annulus_offset=0,
-    autosize_psf_mask_in_lambda_over_d=2.4,  # radius of the unsaturated PSF I am using as a model, in pixels
+    autosize_psf_mask_in_lambda_over_d=True,  # radius of the unsaturated PSF I am using as a model, in pixels
+    psf_mask_size_in_lambda_over_d=2.4,
+    signal_mask_psf_size=21,  # if autosize None, fix size in pixels, must be >= reduction mask size
     reduction_mask_psf_size=21,  # if autosize None, fix size in pixels
-    signal_mask_psf_size=21,  # if autosize None, fix size in pixels
     add_radial_regressors=True,  # Add regressors at same azimuth as search location, but displace by following values
     radial_separation_from_source=[-8, 6],  # -8, 6  -5, 3
     include_opposite_regressors=True,  # Add region opposite reduction region to regressor pool
@@ -61,7 +63,7 @@ reduction_parameters = Reduction_parameters(
 # Number of components in fractions of the maximum number, if more than one number is given
 # The algorithm will loop over them
 number_of_components_fraction = [0.3]
-
+contrast_curve = True
 # READ DATA
 # I need a datacube
 # Datacube, shape=[optional dimension for wavelenghts][#number of frames][data:data]
@@ -94,6 +96,7 @@ xy_image_centers = None  # if running reduction on un-centered data, provide xy 
 
 # Waffle amplitudes
 amplitude_modulation_full = None  # modulation of model compared to median flux
+contrast_map_full = None
 
 # Example for small circular region at planet position
 # reduction_parameters.search_region = regressor_selection.make_signal_mask(
@@ -115,4 +118,5 @@ run_complete_reduction(
     bad_pixel_mask_full=bad_pixel_mask_full,
     xy_image_centers=xy_image_centers,
     amplitude_modulation_full=amplitude_modulation_full,
-    contrast_map=None)
+    contrast_map_full=contrast_map_full,
+    contrast_curve=contrast_curve)
