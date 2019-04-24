@@ -1,27 +1,10 @@
 #!/bin/bash
-#SBATCH -p daceg -o my.stdout --mail-user=anthony.cheetham@unige.ch --mail-type=ALL --error=error_output_%j
 
-# module add openmpi/gcc/1.8.4
-# module add python/2.7.8
-
-#Steps for analysis:
-# 1. rm_overscan to make images square
-# 2. register to measure the psf centre etc.
-# 3. NaNmedian to make the sky frames
-# 4. sky_sub to subtract sky frames from data (or pca_sky_sub)
-# 5. bad_pix to remove bad pixels and flat field the data
-# 6. medianfilter to smooth the images
-# 6b. (Optional) Bin the data
-# 7. psf_sub to subtract the psf (LOCI)
-# 8. deromed to derotate and combine the images.
-
-# Steps 1-5 need to be repeated for the flux frames.
-# If the SNR is low, steps 2-4 may need to be repeated. (i.e. 1234 234 5678)
+# This script is for AGPM targets with only a few sky frames
+# It is different from the normal reduction in the following ways:
+# - Regular sky sub instead of PCA due to low number of sky frames
 
 GRAPHIC_VERSION="3.3"
-
-# In case we need to add any command line options to mpirun
-GRAPHIC_OPTIONS=""
 
 # Number of processors used to run GRAPHIC
 GRAPHIC_N_CORES="" #for running on a cluster
@@ -47,13 +30,13 @@ cd Sky
 rm $OUTPUT_FILE
 
 # # #  Remove the region outside the AGPM 
-mpirun $GRAPHIC_N_CORES_SKY $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_rm_overscan_"$GRAPHIC_VERSION".py" --pattern NACO --l_max 600 --centre_offset 391 425 --fix_naco_columns >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES_SKY python $GRAPHIC_DIR"GRAPHIC_rm_overscan_"$GRAPHIC_VERSION".py" --pattern NACO --l_max 600 --centre_offset 391 425 --fix_naco_columns >> $OUTPUT_FILE
 
 # # #  # Calculate parallactic angle, but don't look for the star centre
-mpirun $GRAPHIC_N_CORES_SKY $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_register_"$GRAPHIC_VERSION".py" --pattern o_NACO -no_psf -naco >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES_SKY python $GRAPHIC_DIR"GRAPHIC_register_"$GRAPHIC_VERSION".py" --pattern o_NACO -no_psf -naco >> $OUTPUT_FILE
 
 # # # # Calculate the sky frames 
-mpirun $GRAPHIC_N_CORES_SKY $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_n_NaNmedian_"$GRAPHIC_VERSION".py" --pattern o_NACO --num 1 --win 0 --info_pattern all_info_ -nofit >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES_SKY python $GRAPHIC_DIR"GRAPHIC_n_NaNmedian_"$GRAPHIC_VERSION".py" --pattern o_NACO --num 1 --win 0 --info_pattern all_info_ -nofit >> $OUTPUT_FILE
 
 # Get the AGPM centre from the sky frames
 mpirun $GRAPHIC_N_CORES_SKY python $GRAPHIC_DIR"GRAPHIC_naco_agpm_offset_"$GRAPHIC_VERSION".py" --pattern sky-num/med1  >> $OUTPUT_FILE
@@ -71,11 +54,11 @@ cd ..
 cd Targ
 
 #  Remove the region outside the AGPM 
-mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_rm_overscan_"$GRAPHIC_VERSION".py" --pattern NACO --l_max 600 --centre_offset 391 425 --fix_naco_columns >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_rm_overscan_"$GRAPHIC_VERSION".py" --pattern NACO --l_max 600 --centre_offset 391 425 --fix_naco_columns >> $OUTPUT_FILE
 
 # # # Register it with graphic but don't calculate the centre yet. Then sky subtract and remove bad pixels
-mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_register_"$GRAPHIC_VERSION".py" --pattern o_NACO -naco -no_psf >> $OUTPUT_FILE
-mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir ../Sky/sky-num --info_dir cube-info --info_pattern all_info_ -nofit >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_register_"$GRAPHIC_VERSION".py" --pattern o_NACO -naco -no_psf >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir ../Sky/sky-num --info_dir cube-info --info_pattern all_info_ -nofit >> $OUTPUT_FILE
 # mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_pca_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir ../Sky/sky-num --info_dir cube-info --info_pattern all_info_*o_NACO -nofit --pca_modes 5 -fix_naco_bad_columns >> $OUTPUT_FILE
 
 # # # Now calculate the actual centre using the sky subtracted frames
