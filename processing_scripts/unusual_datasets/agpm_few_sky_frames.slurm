@@ -58,7 +58,7 @@ mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_rm_overscan_"$GRAPHIC_VERSIO
 
 # # # Register it with graphic but don't calculate the centre yet. Then sky subtract and remove bad pixels
 mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_register_"$GRAPHIC_VERSION".py" --pattern o_NACO -naco -no_psf >> $OUTPUT_FILE
-mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir ../Sky/sky-num --info_dir cube-info --info_pattern all_info_ -nofit >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir ../Sky/sky-num --info_dir cube-info --info_pattern all_info_ -nofit -fix_naco_bad_columns >> $OUTPUT_FILE
 # mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_pca_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir ../Sky/sky-num --info_dir cube-info --info_pattern all_info_*o_NACO -nofit --pca_modes 5 -fix_naco_bad_columns >> $OUTPUT_FILE
 
 # # # Now calculate the actual centre using the sky subtracted frames

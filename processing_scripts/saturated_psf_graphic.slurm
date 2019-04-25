@@ -52,7 +52,7 @@ mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_rm_overscan
 # # Register it with graphic but don't calculate the centre yet. Then make some rough skies without blocking the star out and subtract that from the data.
 mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_register_"$GRAPHIC_VERSION".py" --pattern o_NACO -no_psf -naco >> $OUTPUT_FILE
 mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_n_NaNmedian_"$GRAPHIC_VERSION".py" --pattern o_NACO --num $GRAPHIC_N_SKY --win 0 --info_pattern all_info_ -nofit >> $OUTPUT_FILE
-# # # mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir sky-num --info_dir cube-info --info_pattern all_info_ -nofit --sky_interp 5 >> $OUTPUT_FILE
+# # # mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir sky-num --info_dir cube-info --info_pattern all_info_ -nofit --sky_interp 5 -fix_naco_bad_columns >> $OUTPUT_FILE
 mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_pca_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir sky-num --info_dir cube-info --info_pattern all_info_*o_NACO -nofit --pca_modes 1 -fix_naco_bad_columns >> $OUTPUT_FILE
 
 # # Delete the rough sky frames (since we don't need them anymore)
@@ -62,7 +62,7 @@ rm sky-num/med*.fits
 mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_register_"$GRAPHIC_VERSION".py" --pattern nomed_ -naco -saturated >> $OUTPUT_FILE
 mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_n_NaNmedian_"$GRAPHIC_VERSION".py" --pattern o_NACO --num $GRAPHIC_N_SKY --win 40 --info_pattern all_info_*nomed >> $OUTPUT_FILE
 rm nomed*.fits # Delete the rough sky subtracted frames from before
-## mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir sky-num --info_dir cube-info --info_pattern all_info_ --sky_interp 5 >> $OUTPUT_FILE
+## mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir sky-num --info_dir cube-info --info_pattern all_info_ --sky_interp 5 -fix_naco_bad_columns >> $OUTPUT_FILE
 mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_pca_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir sky-num --info_dir cube-info --info_pattern all_info_*nomed -nofit --pca_modes 5 -fix_naco_bad_columns >> $OUTPUT_FILE
 
 # # # Maybe we also want to do the star centroid again if it didn't work well on the rough sky subtracted data

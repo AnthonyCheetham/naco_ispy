@@ -4,12 +4,13 @@
 # It is different from the normal reduction in the following ways:
 # - Regular sky sub instead of PCA due to low number of sky frames
 # - Uses the positive Gaussian method for centring (in the pre-sky subtracted frames) due to excessive saturation
+# - Slightly bigger search radius
 
 GRAPHIC_VERSION="3.3"
 
 # Number of processors used to run GRAPHIC
 GRAPHIC_N_CORES="" #for running on a cluster
-GRAPHIC_N_CORES="-n 3" # for running on a laptop. Make sure n_cores is less than or equal to the number of files!
+GRAPHIC_N_CORES="-n 6" # for running on a laptop. Make sure n_cores is less than or equal to the number of files!
 
 # Number of sky files
 GRAPHIC_N_SKY="$(ls -l Sky/NACO*.fits | wc -l)"
@@ -59,7 +60,7 @@ mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_rm_overscan_"$GRAPHIC_VERSIO
 
 # # # Register it with graphic but don't calculate the centre yet. Then sky subtract and remove bad pixels
 mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_register_"$GRAPHIC_VERSION".py" --pattern o_NACO -naco -no_psf >> $OUTPUT_FILE
-mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir ../Sky/sky-num --info_dir cube-info --info_pattern all_info_ -nofit >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir ../Sky/sky-num --info_dir cube-info --info_pattern all_info_ -nofit -fix_naco_bad_columns >> $OUTPUT_FILE
 # mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_pca_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir ../Sky/sky-num --info_dir cube-info --info_pattern all_info_*o_NACO -nofit --pca_modes 5 -fix_naco_bad_columns >> $OUTPUT_FILE
 
 # # # Now calculate the actual centre using the sky subtracted frames
