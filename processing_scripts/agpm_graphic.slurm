@@ -88,7 +88,7 @@ mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_pca_sky_sub
 mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_naco_agpm_register_"$GRAPHIC_VERSION".py" --pattern nomed  >> $OUTPUT_FILE
 
 # # Run frame selection on the data
-python $GRAPHIC_DIR"GRAPHIC_frame_selection_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_*nomed* --centering_nsigma 5 --flux_nsigma 5 --psf_width_nsigma 5 -agpm_centre>> $OUTPUT_FILE
+python $GRAPHIC_DIR"GRAPHIC_frame_selection_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_*nomed* --centering_nsigma 5 --flux_nsigma 5 --psf_width_nsigma 5 -agpm_centre -split_normal >> $OUTPUT_FILE
 # # python $GRAPHIC_DIR"GRAPHIC_frame_selection_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_*o_NACO* --centering_nsigma 5 --flux_nsigma 1e6 --psf_width_nsigma 1e6 --debug 3 >> $OUTPUT_FILE
 
 # # # Bin the data (if required)
