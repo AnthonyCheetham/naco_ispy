@@ -29,7 +29,8 @@ GRAPHIC_N_CORES="-n 6" # for running on a laptop. Make sure n_cores is less than
 
 # Number of sky files
 GRAPHIC_N_SKY="$(ls -l Sky/NACO*.fits | wc -l)"
-GRAPHIC_N_CORES_SKY="-n $(($GRAPHIC_N_SKY<${GRAPHIC_N_CORES: -1}?$GRAPHIC_N_SKY:${GRAPHIC_N_CORES: -1}))" # take the minimum of n_cores and n_sky
+GRAPHIC_N_CORES_SKY="-n $(($((GRAPHIC_N_SKY+1))<${GRAPHIC_N_CORES: -1}?$((GRAPHIC_N_SKY+1)):${GRAPHIC_N_CORES: -1}))" # take the minimum of n_cores and (n_sky+1)
+#some of the processes have the rank=0 process doing nothing, so we need n_sky+1 processes to do them all at the same time.
 
 # Number of target cubes to bin together to make the final cube (i.e. all of them)
 GRAPHIC_N_TARG="$(ls -l Targ/NACO*.fits | wc -l)"
