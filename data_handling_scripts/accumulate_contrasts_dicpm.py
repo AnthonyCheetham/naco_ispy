@@ -36,7 +36,7 @@ for contrast_file in contrast_files:
 
     # Remove all the NaNs
     good_ix = np.isfinite(con_data[1])
-	con_data = con_data.T
+    con_data = con_data.T
     con_data = con_data[good_ix]
 
     np.savetxt(new_name,con_data,header=hdr)
