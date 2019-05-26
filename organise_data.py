@@ -13,9 +13,9 @@ file moves without actually moving them
 import os,glob,shutil
 import astropy.io.fits as pyfits
 from astropy.time import Time
-from monitor import detect_filetype
+from naco_ispy.monitor import detect_filetype
 import numpy as np
-import header
+from naco_ispy import header
 
 ###############
 

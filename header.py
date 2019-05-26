@@ -128,7 +128,7 @@ def make_header_file(wdir,prefix='NACO',extn='.fits',save_name='header.txt',head
     data_files=sorted(glob.glob(wdir+prefix+'*'+extn))
     
     nfiles=len(data_files)
-    print '  Files found:',nfiles
+    print('  Files found: '+str(nfiles))
 
     # Use get_info_from_files to read through all of the headers and get the right values    
     all_info=get_info_from_files(data_files,header_keys,wdir=wdir)
@@ -167,7 +167,7 @@ def make_calib_header_file(wdir,prefix='NACO',extn='.fits',save_name='header.txt
     data_files=sorted(glob.glob(wdir+prefix+'*'+extn))
     
     nfiles=len(data_files)
-    print '  Files found:',nfiles
+    print('  Files found: '+str(nfiles))
     
     all_info=get_info_from_files(data_files,target_keys,wdir=wdir)
 

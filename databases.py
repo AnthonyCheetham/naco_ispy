@@ -25,8 +25,8 @@ import os,glob,string,time
 import astropy.io.fits as pf
 from astropy.time import Time
 from astropy.table import Table
-from monitor import detect_filetype
-import organise_data
+from naco_ispy.monitor import detect_filetype
+from naco_ispy import organise_data
 
 ########################
 
@@ -110,7 +110,7 @@ class obs_table(object):
             data=Table.read(filename,format=table_format)
             self.data=data
         except:
-            print 'Observations Table not found!',filename
+            print('Observations Table not found! '+str(filename))
             self.create()
     
     ########################
@@ -125,7 +125,7 @@ class obs_table(object):
     ########################
     def save(self):
         ''' Save changes to the table to disk'''
-        print 'Saving table as',self.filename
+        print('Saving table as '+str(self.filename))
         self.data.write(self.filename,format=self.table_format,overwrite=True)
         
     ########################
@@ -141,7 +141,7 @@ class obs_table(object):
         self.data.add_row(obs_sequence)
         
         # save it to disk (actually we can do this at the end)
-#        print 'Saving table as',self.filename
+#        print('Saving table as '+str(self.filename))
 #        self.data.write(self.filename,format=self.table_format)
         
     ########################
@@ -449,7 +449,7 @@ class calib_table(obs_table):
             data=Table.read(filename,format=table_format)
             self.data=data
         except:
-            print 'Calibrations Table not found!',filename
+            print('Calibrations Table not found! '+str(filename))
             
         
         if data_folder[-1] != os.sep:
@@ -493,7 +493,7 @@ class calib_table(obs_table):
             self.data.add_row(calib_row)
         
         # Find the astrometric calibrations
-        print 'Astrometric calibrations not implemented'
+        print('Astrometric calibrations not implemented')
         
 
 ##  Code for testing

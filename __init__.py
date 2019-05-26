@@ -11,9 +11,7 @@ has already been processed and what calibrations are available
 @author: cheetham
 """
 
-import numpy as np
-import scipy
-import monitor
-import databases
-import organise_data
-import header
+from . import monitor
+from . import databases
+from . import organise_data
+from . import header
