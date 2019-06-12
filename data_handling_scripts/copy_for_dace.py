@@ -21,6 +21,7 @@ import glob,os,sys,argparse
 import astropy.io.fits as pf
 from astropy import table
 import naco_ispy
+import glob
 
 
 parser = argparse.ArgumentParser(description='This program copies all processed NACO ISPY data to the right format and directory for DACE.')
@@ -41,6 +42,7 @@ dry_run = args.dry_run
 # Define the directories etc here
 data_folder = '/data/NACO/'
 db_filename = '/data/NACO/obs_table.dat'
+save_folder = '/data/NACO/NACO-ISPYDRS/DRS-1.0/reduced/'
 # data_folder='/Users/cheetham/data/naco_data/GTO/'
 # db_filename='/Users/cheetham/data/naco_data/GTO/obs_table.dat'
 
@@ -50,7 +52,7 @@ db_filename = '/data/NACO/obs_table.dat'
 
 ###############
 
-def add_dace_headers(hdr,targ_row):
+def add_dace_headers(hdr,targ_row,postproc_algorithm=None):
     ''' Add the necessary keywords to the header of a file so that DACE
     knows how to catalogue it.
     
@@ -84,6 +86,10 @@ def add_dace_headers(hdr,targ_row):
     hdr['HIERARCH DACE IMAGING SEEING R0'] = targ_row['r0']
     hdr['HIERARCH DACE IMAGING SEEING T0'] = targ_row['t0']
     hdr['HIERARCH DACE IMAGING DIT'] = targ_row['ExpTime']
+
+    # Add postprocessing algorithm if neeeded
+    if not (postproc_algorithm is None):
+        hdr['HIERARCH DACE ALGORITHM'] = postproc_algorithm
     
     return hdr
     
@@ -91,22 +97,17 @@ def add_dace_headers(hdr,targ_row):
     
 ###############
 
-def copy_dataset_for_dace(dir_in, targ_row, flux_file = 'flux_cube.fits',
-#          adi_file = 'GRAPHIC_PCA/smart_annular_pca_derot.fits',
-        adi_file = 'GRAPHIC_PCA/pca_multimodes.fits',
-        contrast_file = 'GRAPHIC_PCA/contrast.txt',
-        snr_file = 'GRAPHIC_PCA/snr_map.fits',
-        dir_out = ''):
-    ''' Copy the final products for a single dataset to a directory accessible 
+def copy_dataset_for_dace_flux(dir_in, targ_row, flux_file = 'flux_cube.fits',
+        dir_out = '', archive_name = '', postproc_algorithm='gpca'):
+    ''' Copy the flux frame for a single dataset to a directory accessible 
     by DACE
     targ_row is the row from the database containing the target
     '''
     
-    # Check that the files are there    
+    # Check that the files are there
     flux_exists = os.access(dir_in+flux_file, os.F_OK)
-    adi_exists = os.access(dir_in+adi_file, os.F_OK)
-    contrast_exists = os.access(dir_in+contrast_file, os.F_OK)
-    snr_exists = os.access(dir_in+snr_file, os.F_OK)
+
+    nonsat_filename = dir_out + archive_name+'_ns.fits' # Only need one
     
     # Check that the output directory exists and create it
     if not os.access(dir_out, os.F_OK):
@@ -121,34 +122,58 @@ def copy_dataset_for_dace(dir_in, targ_row, flux_file = 'flux_cube.fits',
         hdr = add_dace_headers(hdr,targ_row)
         
         # Save it out
-        pf.writeto(dir_out+'non_saturated.fits',im,header=hdr,clobber=True,
+        pf.writeto(nonsat_filename,im,header=hdr,overwrite=True,
                    output_verify='silentfix')
+
+def copy_dataset_for_dace_pca(dir_in, targ_row, flux_file = 'flux_cube.fits',
+        adi_file = 'GRAPHIC_PCA/pca_multimodes.fits',
+        contrast_file = 'GRAPHIC_PCA/contrast.txt',
+        snr_file = 'GRAPHIC_PCA/snr_map.fits',
+        dir_out = '',archive_name = '',
+        postproc_algorithm='gpca'):
+    ''' Copy the final products for a single dataset to a directory accessible 
+    by DACE
+    targ_row is the row from the database containing the target
+    '''
     
+    # Check that the files are there
+    adi_exists = os.access(dir_in+adi_file, os.F_OK)
+    contrast_exists = os.access(dir_in+contrast_file, os.F_OK)
+    snr_exists = os.access(dir_in+snr_file, os.F_OK)
+
+    highcontrast_filename = dir_out + archive_name+'_'+postproc_algorithm+'_hc.fits'
+    snr_filename =          dir_out + archive_name+'_'+postproc_algorithm+'_snr.fits'
+    lims_filename =         dir_out + archive_name+'_'+postproc_algorithm+'_dl.rdb'
+    
+    # Check that the output directory exists and create it
+    if not os.access(dir_out, os.F_OK):
+        os.makedirs(dir_out)
+
+    # Now go through them one by one
     if adi_exists:
         # Load it
         im,hdr = pf.getdata(dir_in+adi_file,header=True)
         
         # Fix the header
-        hdr = add_dace_headers(hdr,targ_row)
+        hdr = add_dace_headers(hdr,targ_row,postproc_algorithm='PCA')
         
         # Save it out
-        pf.writeto(dir_out+'high_contrast.fits',im,header=hdr,clobber=True,
+        pf.writeto(highcontrast_filename,im,header=hdr,overwrite=True,
                    output_verify='silentfix')
-                   
+                       
     if snr_exists:
         # Load it
         im,hdr = pf.getdata(dir_in+snr_file,header=True)
         
         # Fix the header
-        hdr = add_dace_headers(hdr,targ_row)
+        hdr = add_dace_headers(hdr,targ_row,postproc_algorithm='PCA')
         
         # Save it out
-        pf.writeto(dir_out+'signal_to_noise_map.fits',im,header=hdr,clobber=True,
+        pf.writeto(snr_filename,im,header=hdr,overwrite=True,
                    output_verify='silentfix')
         
     
     if contrast_exists:
-        
         # Load it
         sep,con = np.loadtxt(dir_in+contrast_file)
         
@@ -165,8 +190,109 @@ def copy_dataset_for_dace(dir_in, targ_row, flux_file = 'flux_cube.fits',
             data={'Separation':sep,'Contrast':con}
             tab = table.Table(data,names=['Separation','Contrast'])
             
-            tab.write(dir_out+'detection_limits.rdb',format='rdb')
-    print('    '+str(flux_exists)+' '+str(adi_exists)+' '+str(snr_exists)+' '+str(contrast_exists))
+            tab.write(lims_filename,format='rdb',overwrite=True)
+
+
+def copy_dataset_for_dace_cadi(dir_in, targ_row,adi_file = 'cADI/smart_adi_derot.fits',archive_name='',
+    dir_out = '',postproc_algorithm='cadi'):
+    ''' Copy the cADI final product for a single dataset to a directory accessible 
+    by DACE
+    targ_row is the row from the database containing the target
+    '''
+    
+    # Check that the files are there
+    adi_exists = os.access(dir_in+adi_file, os.F_OK)
+
+    highcontrast_filename = dir_out + archive_name+'_'+postproc_algorithm+'_hc.fits'
+    
+    # Check that the output directory exists and create it
+    if not os.access(dir_out, os.F_OK):
+        os.makedirs(dir_out)
+
+    # Now go through them one by one
+    if adi_exists:
+        # Load it
+        im,hdr = pf.getdata(dir_in+adi_file,header=True)
+        
+        # Fix the header
+        hdr = add_dace_headers(hdr,targ_row,postproc_algorithm='cADI')
+        
+        # Save it out
+        pf.writeto(highcontrast_filename,im,header=hdr,overwrite=True,
+                   output_verify='silentfix')
+
+def copy_dataset_for_dace_trap(dir_in, targ_row, dir_out = '',archive_name='',postproc_algorithm='trap',header=None):
+    ''' Copy the TRAP/DICPM final products for a single dataset to a directory accessible 
+    by DACE
+    targ_row is the row from the database containing the target
+    '''
+
+    # We have to find the files in case they have a different name
+    adi_file = glob.glob(dir_in+'DICPM'+os.sep+'detection*.fits')
+    snr_file = glob.glob(dir_in+'DICPM'+os.sep+'norm_detection*.fits')
+    contrast_file = glob.glob(dir_in+'DICPM'+os.sep+'contrast_table*.fits')
+    
+    # Check that the files are there
+    adi_exists = len(adi_file) > 0
+    snr_exists = len(snr_file) > 0
+    contrast_exists = len(contrast_file) > 0
+
+    highcontrast_filename = dir_out + archive_name+'_'+postproc_algorithm+'_hc.fits'
+    snr_filename =          dir_out + archive_name+'_'+postproc_algorithm+'_snr.fits'
+    lims_filename =         dir_out + archive_name+'_'+postproc_algorithm+'_dl.rdb'
+    
+    # Check that the output directory exists and create it
+    if not os.access(dir_out, os.F_OK):
+        os.makedirs(dir_out)
+
+    # Now go through them one by one
+    if adi_exists:
+        # Load it
+        im = pf.getdata(adi_file[0])[0] # First frame is the best-fit contrast
+        
+        # Fix the header
+        header = add_dace_headers(header,targ_row,postproc_algorithm='TRAP')
+        
+        # Save it out
+        pf.writeto(highcontrast_filename,im,header=header,overwrite=True,
+                   output_verify='silentfix')
+
+                       
+    if snr_exists:
+        # Load it
+        im = pf.getdata(snr_file[0])
+        
+        # Fix the header
+        header = add_dace_headers(header,targ_row,postproc_algorithm='TRAP')
+        
+        # Save it out
+        pf.writeto(snr_filename,im,header=header,overwrite=True,
+                   output_verify='silentfix')
+        
+    
+    if contrast_exists:
+        # Load it
+        hdulist = pf.open(contrast_file[0])
+        tab = hdulist[1].data
+
+        sep = tab['sep (mas)']/1000. # in arcsec
+        con_ratio = tab['contrast_50'] # contrast ratio
+        con = -2.5*np.log10(con_ratio) # contrast (mag)
+        
+        # Remove any NaNs
+        sep = sep[np.isnan(con) == False]
+        con = con[np.isnan(con) == False]
+        
+        # If there are no values left, print an error
+        if len(con) == 0:
+            print('    Contrast curve is only NaNs! Not copied...')
+        else:
+            
+            # convert to rdb
+            data={'Separation':sep,'Contrast':con}
+            tab = table.Table(data,names=['Separation','Contrast'])
+            
+            tab.write(lims_filename,format='rdb',overwrite=True)
 
 ###############
 
@@ -191,7 +317,8 @@ for targ_row in data[skip:num]:
             band = 'Lp'
         else:
             continue
-        dir_out = data_folder + 'Final_products'+os.sep+'NACO'+os.sep + targ_row['TargetName'] +os.sep+ targ_row['Date']+os.sep+band+os.sep
+
+        dir_out = save_folder + targ_row['Date'] + os.sep
 
         dir_in = targ_row['Location']+'ADI'+os.sep
 
@@ -201,7 +328,26 @@ for targ_row in data[skip:num]:
             print('target:'+dir_out)
         else:
             print('  Copying from: '+targ_row['Location'])
-            copy_dataset_for_dace(dir_in,targ_row,dir_out=dir_out)
+            # Get the archive name from the master_cube file
+            if os.access(dir_in+'master_cube_PCA.fits',os.F_OK):
+                header = pf.getheader(dir_in+'master_cube_PCA.fits')
+            else:
+                # Otherwise skip this one...
+                print('Didnt find cleaned cube for {0}. Skipping.'.format(dir_in))
+                continue
+            archive_name = header['ARCFILE'].replace('.fits','')
+
+            # Flux frame
+            copy_dataset_for_dace_flux(dir_in,targ_row,dir_out=dir_out,archive_name=archive_name)
+
+            # GRAPHIC_PCA
+            copy_dataset_for_dace_pca(dir_in,targ_row,dir_out=dir_out,archive_name=archive_name)
+
+            # TRAP
+            copy_dataset_for_dace_trap(dir_in,targ_row,dir_out=dir_out,archive_name=archive_name,header=header)
+
+            # cADI
+            copy_dataset_for_dace_cadi(dir_in,targ_row,dir_out=dir_out,archive_name=archive_name)
 
 # Find all of the relevant files
 #star='hd15115/'
