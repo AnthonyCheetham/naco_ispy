@@ -312,6 +312,7 @@ class obs_table(object):
         
         # Find the list of directories
         targ_directories=glob.glob(self.data_folder+'*/*/')
+        targ_directories.sort()
 
         # Load the already known directories so we can check at ones that are missing
         known_locs = self.data['Location'].tolist()
