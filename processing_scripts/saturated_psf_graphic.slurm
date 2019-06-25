@@ -25,7 +25,7 @@
 # GRAPHIC_DIR="/Users/cheetham/code/graphic_git/"$GRAPHIC_VERSION"/"
 
 # GRAPHIC_OPTIONS="-mca btl ^openib"
-GRAPHIC_OPTIONS=""
+GRAPHIC_OPTIONS="-mca btl ^openib"
 
 GRAPHIC_N_CORES="" #for running on a cluster
 GRAPHIC_N_CORES="-n 6" # for running on a laptop. Make sure n_cores is less than or equal to the number of files!
@@ -63,7 +63,7 @@ mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_register_"$
 mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_n_NaNmedian_"$GRAPHIC_VERSION".py" --pattern o_NACO --num $GRAPHIC_N_SKY --win 40 --info_pattern all_info_*nomed >> $OUTPUT_FILE
 rm nomed*.fits # Delete the rough sky subtracted frames from before
 ## mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir sky-num --info_dir cube-info --info_pattern all_info_ --sky_interp 5 -fix_naco_bad_columns >> $OUTPUT_FILE
-mpirun $GRAPHIC_N_CORES python $GRAPHIC_DIR"GRAPHIC_pca_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir sky-num --info_dir cube-info --info_pattern all_info_*nomed -nofit --pca_modes 5 -fix_naco_bad_columns >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_pca_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir sky-num --info_dir cube-info --info_pattern all_info_*nomed -nofit --pca_modes 5 -fix_naco_bad_columns >> $OUTPUT_FILE
 
 # # # Maybe we also want to do the star centroid again if it didn't work well on the rough sky subtracted data
 rm cube-info/all_info*nomed*.rdb
