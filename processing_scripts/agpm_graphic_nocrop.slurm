@@ -21,7 +21,7 @@
 GRAPHIC_VERSION="3.3"
 
 # In case we need to add any command line options to mpirun
-GRAPHIC_OPTIONS=""
+GRAPHIC_OPTIONS="-mca btl ^openib"
 
 # Number of processors used to run GRAPHIC
 GRAPHIC_N_CORES="" #for running on a cluster
