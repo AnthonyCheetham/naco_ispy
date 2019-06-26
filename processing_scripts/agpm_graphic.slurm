@@ -48,7 +48,7 @@ cd Sky
 rm $OUTPUT_FILE
 
 # # #  Remove the region outside the AGPM 
-mpirun $GRAPHIC_N_CORES_SKY $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_rm_overscan_"$GRAPHIC_VERSION".py" --pattern NACO --l_max 600 --centre_offset 391 425 --fix_naco_columns >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES_SKY $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_rm_overscan_"$GRAPHIC_VERSION".py" --pattern NACO --fix_naco_columns >> $OUTPUT_FILE
 
 # # #  # Calculate parallactic angle, but don't look for the star centre
 mpirun $GRAPHIC_N_CORES_SKY $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_register_"$GRAPHIC_VERSION".py" --pattern o_NACO -no_psf -naco >> $OUTPUT_FILE
@@ -72,7 +72,7 @@ cd ..
 cd Targ
 
 #  Remove the region outside the AGPM 
-mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_rm_overscan_"$GRAPHIC_VERSION".py" --pattern NACO --l_max 600 --centre_offset 391 425 --fix_naco_columns >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_rm_overscan_"$GRAPHIC_VERSION".py" --pattern NACO --fix_naco_columns >> $OUTPUT_FILE
 
 # # # Register it with graphic but don't calculate the centre yet. Then sky subtract and remove bad pixels
 mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_register_"$GRAPHIC_VERSION".py" --pattern o_NACO -naco -no_psf >> $OUTPUT_FILE
