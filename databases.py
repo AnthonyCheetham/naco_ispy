@@ -291,7 +291,7 @@ class obs_table(object):
             flux_cube = pf.getdata(flux_cube_file)
             
             # Just take the central pixel as a flux measurement
-            flux = flux_cube[:,flux_cube.shape[1]/2,flux_cube.shape[2]/2]
+            flux = flux_cube[:,flux_cube.shape[1]//2,flux_cube.shape[2]//2]
             
             targ_row['PsfMinmaxRatio'] = np.round(np.nanmin(flux)/np.nanmax(flux),decimals=3)
             targ_row['PsfStdRatio'] = np.round(np.nanstd(flux) / np.nanmean(flux),decimals=3)
@@ -345,7 +345,7 @@ class obs_table(object):
                 print('Warning: No files found in directory:',targ_dir+'Targ/')
             else:
                 # Take the middle file to estimate some params          
-                head=pf.getheader(targ_files[len(targ_files)/2])
+                head=pf.getheader(targ_files[len(targ_files)//2])
                 targ_row=self.get_header_info(targ_row,head)
                 
                 # Now get the parameters we need the whole sequence for (this is a slow step, but <5 sec)
