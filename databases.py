@@ -53,7 +53,7 @@ def read_rdb(rdb_file,h=0,comment=None):
 
 	for line in data[h+2:]:
 		if not line[0]==comment or line[0:2]=='--':
-			qq = string.split(line[:-1],'\t')
+			qq = line[:-1].split('\t')
 			for i in range(len(key)):
 				try: value = float(qq[i])
 				except ValueError: value = qq[i]
