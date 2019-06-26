@@ -47,7 +47,7 @@ def read_rdb(rdb_file,h=0,comment=None):
 	f.close()
 
 	# take the second line to define the list keys.
-	key = string.split(data[h][:-1],'\t')
+	key = data[h][:-1].split('\t')
 	data_list = {}
 	for i in range(len(key)): data_list[key[i]] = []
 
