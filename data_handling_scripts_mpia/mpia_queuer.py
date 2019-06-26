@@ -42,7 +42,7 @@ def write_file(queue_file,jobs):
 			myf.write(txt)
 
 # 
-def main_loop()
+def main_loop():
 	print('ISPY job queuer started!')
 	print('Press ctrl+c to exit')
 	while True:
