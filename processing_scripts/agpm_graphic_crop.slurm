@@ -20,9 +20,6 @@
 
 GRAPHIC_VERSION="3.3"
 
-# In case we need to add any command line options to mpirun
-GRAPHIC_OPTIONS="-mca btl ^openib"
-
 # Number of processors used to run GRAPHIC
 GRAPHIC_N_CORES="" #for running on a cluster
 GRAPHIC_N_CORES="-n 6" # for running on a laptop. Make sure n_cores is less than or equal to the number of files!
@@ -76,7 +73,7 @@ mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_rm_overscan
 
 # # # Register it with graphic but don't calculate the centre yet. Then sky subtract and remove bad pixels
 mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_register_"$GRAPHIC_VERSION".py" --pattern o_NACO -naco -no_psf >> $OUTPUT_FILE
-# # # mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir sky-num --info_dir cube-info --info_pattern all_info_ -nofit --sky_interp 3 -fix_naco_bad_columns >> $OUTPUT_FILE
+# # # mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir ../Sky/sky-num --info_dir cube-info --info_pattern all_info_ -nofit --sky_interp 3 -fix_naco_bad_columns >> $OUTPUT_FILE
 mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_pca_sky_sub_"$GRAPHIC_VERSION".py" --pattern o_NACO --sky_pattern med --sky_dir ../Sky/sky-num --info_dir cube-info --info_pattern all_info_*o_NACO -nofit --pca_modes 5 -fix_naco_bad_columns >> $OUTPUT_FILE
 
 # # # Now calculate the actual centre using the sky subtracted frames

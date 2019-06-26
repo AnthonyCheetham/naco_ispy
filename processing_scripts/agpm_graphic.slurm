@@ -20,9 +20,6 @@
 
 GRAPHIC_VERSION="3.3"
 
-# In case we need to add any command line options to mpirun
-GRAPHIC_OPTIONS="-mca btl ^openib"
-
 # Number of processors used to run GRAPHIC
 GRAPHIC_N_CORES="" #for running on a cluster
 GRAPHIC_N_CORES="-n 6" # for running on a laptop. Make sure n_cores is less than or equal to the number of files!
@@ -57,7 +54,7 @@ mpirun $GRAPHIC_N_CORES_SKY $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_registe
 mpirun $GRAPHIC_N_CORES_SKY $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_n_NaNmedian_"$GRAPHIC_VERSION".py" --pattern o_NACO --num 1 --win 0 --info_pattern all_info_ -nofit >> $OUTPUT_FILE
 
 # Get the AGPM centre from the sky frames
-mpirun $GRAPHIC_N_CORES_SKY $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_naco_agpm_offset_"$GRAPHIC_VERSION".py" --pattern sky-num/med1  >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES_SKY $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_naco_agpm_offset_"$GRAPHIC_VERSION".py" --pattern sky-num/med1 -fit_1d >> $OUTPUT_FILE
 
 cd ..
 
@@ -86,7 +83,7 @@ mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_pca_sky_sub
 # # Option 2: Fit to the AGPM centre
 # # mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_register_"$GRAPHIC_VERSION".py" --pattern nomed_ -naco -saturated -agpm_centre --search_region 60 >> $OUTPUT_FILE
 # # Option 3: Nico's AGPM fit:
-mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_naco_agpm_register_"$GRAPHIC_VERSION".py" --pattern nomed  >> $OUTPUT_FILE
+mpirun $GRAPHIC_N_CORES $GRAPHIC_OPTIONS python $GRAPHIC_DIR"GRAPHIC_naco_agpm_register_"$GRAPHIC_VERSION".py" --pattern nomed -fit_1d >> $OUTPUT_FILE
 
 # # Run frame selection on the data
 python $GRAPHIC_DIR"GRAPHIC_frame_selection_"$GRAPHIC_VERSION".py" --pattern nomed_ --info_pattern all_info_*nomed* --centering_nsigma 5 --flux_nsigma 5 --psf_width_nsigma 5 -agpm_centre -split_normal >> $OUTPUT_FILE

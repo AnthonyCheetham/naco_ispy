@@ -12,9 +12,6 @@ GRAPHIC_VERSION="3.3"
 # GRAPHIC_DIR="/home/spectro/cheetham/code/graphic_git/"$GRAPHIC_VERSION"/"
 # GRAPHIC_DIR="/Users/cheetham/code/graphic_git/"$GRAPHIC_VERSION"/"
 
-# In case we need to add any command line options to mpirun
-GRAPHIC_OPTIONS="-mca btl ^openib"
-
 # Number of processors used to run GRAPHIC
 GRAPHIC_N_CORES_FLUX="-n 3"
 GRAPHIC_N_SKY_FLUX="3" # Number of cubes to bin together to make a sky
