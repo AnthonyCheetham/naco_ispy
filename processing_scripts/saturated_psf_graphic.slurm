@@ -25,7 +25,6 @@
 # GRAPHIC_DIR="/Users/cheetham/code/graphic_git/"$GRAPHIC_VERSION"/"
 
 # GRAPHIC_OPTIONS="-mca btl ^openib"
-GRAPHIC_OPTIONS="-mca btl ^openib"
 
 GRAPHIC_N_CORES="" #for running on a cluster
 GRAPHIC_N_CORES="-n 6" # for running on a laptop. Make sure n_cores is less than or equal to the number of files!
