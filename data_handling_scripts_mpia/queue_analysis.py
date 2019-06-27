@@ -45,7 +45,7 @@ db_filename = '/data/beegfs/astro-storage/groups/henning/cheetham/naco-ispy-shar
 #data_folder='/Users/cheetham/data/naco_data/GTO/'
 #db_filename='/Users/cheetham/data/naco_data/GTO/obs_table.dat'
 
-scripts_directory = os.path.expanduser('~/code/naco_ispy/processing_scripts/')
+scripts_directory = os.path.expanduser('/data/beegfs/astro-storage/groups/henning/cheetham/naco-ispy-shared/code/naco_ispy/processing_scripts/')
         
 dry_run = args.dry_run
 
@@ -136,7 +136,13 @@ for targ_ix,targ_row in enumerate(obs_db.data[skip:num]):
             # Save it to the queue file since we're using our own system
             # Get the existing list, append the new job and rewrite it
             all_jobs = mpia_queuer.read_file(mpia_queuer.queue_file)
-            all_jobs.append(job)
+            if len(all_jobs) == 0:
+                all_jobs=[job]
+            elif all_jobs.ndim == 1:
+                all_jobs = np.append([all_jobs],[job],axis=0)
+            else:
+                all_jobs = np.append(all_jobs,[job],axis=0)
+
             mpia_queuer.write_file(mpia_queuer.queue_file,all_jobs)
             
             

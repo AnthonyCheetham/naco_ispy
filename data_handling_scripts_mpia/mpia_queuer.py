@@ -30,16 +30,11 @@ idle_cpu_percent = 50.0 # if it is less than this, the script will launch a job
 
 # Read/write functions for the queue file
 def read_file(queue_file):
-	with open(queue_file,'r') as myf:
-		jobs = myf.readlines()
-	# Unpack
-	jobs = [job.split(',') for job in jobs]
-	return jobs
+    jobs = np.loadtxt(queue_file,delimiter=",",dtype=str)
+    return jobs
+
 def write_file(queue_file,jobs):
-	with open(queue_file,'w') as myf:
-		for item in jobs:
-			txt = item[0]+','+item[1] # use , as a separator
-			myf.write(txt)
+    np.savetxt(queue_file,jobs,delimiter=",",fmt="%s")
 
 # 
 def main_loop():
@@ -55,7 +50,7 @@ def main_loop():
 
 			# 
 			if (cpu_usage < idle_cpu_percent) and (len(jobs) > 0):
-				next_job = jobs.pop(0)
+				next_job = jobs[0]
 
 				# change into the directory and launch the job in the background
 				directory,next_job_cmd = next_job
@@ -68,7 +63,7 @@ def main_loop():
 				subprocess.call(cmd,shell=True)
 
 				# Then save the updated job list
-				write_file(queue_file,jobs)
+				write_file(queue_file,jobs[1:])
 
 			# Some outputs for debugging
 			# elif (len(jobs) == 0):
