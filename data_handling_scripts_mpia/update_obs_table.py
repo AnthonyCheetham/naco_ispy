@@ -9,8 +9,8 @@ This will update the observations table when run on the NACO DRS
 
 import naco_ispy
 
-data_folder = '/data/beegfs/astro-storage/groups/henning/cheetham/naco-ispy-shared/'
-db_filename = '/data/beegfs/astro-storage/groups/henning/cheetham/naco-ispy-shared/obs_table.dat'
+data_folder = '/data/beegfs/astro-storage/groups/henning/rlau/naco-ispy-shared/'
+db_filename = '/data/beegfs/astro-storage/groups/henning/rlau/naco-ispy-shared/obs_table.dat'
 
 # Make the object 
 obs_db = naco_ispy.databases.obs_table(filename=db_filename, data_folder=data_folder)
