@@ -44,8 +44,8 @@ def main_loop():
 		try:
 			# Check queue file for jobs in the queue
 			jobs = read_file(queue_file)
-            if jobs.ndim == 1:
-                jobs = np.array([jobs])
+			if jobs.ndim == 1:
+				jobs = np.array([jobs])
 
 			# Check cpu usage over 10 secs
 			cpu_usage = psutil.cpu_percent(interval=10)
