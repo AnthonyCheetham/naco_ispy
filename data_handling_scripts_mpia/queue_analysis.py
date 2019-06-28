@@ -40,12 +40,12 @@ skip = args.skip
 reprocess = args.reprocess
 queue_script = args.queue_script
 
-data_folder = '/data/beegfs/astro-storage/groups/henning/cheetham/naco-ispy-shared/'
-db_filename = '/data/beegfs/astro-storage/groups/henning/cheetham/naco-ispy-shared/obs_table.dat'
+data_folder = '/data/beegfs/astro-storage/groups/henning/rlau/naco-ispy-shared/'
+db_filename = '/data/beegfs/astro-storage/groups/henning/rlau/naco-ispy-shared/obs_table.dat'
 #data_folder='/Users/cheetham/data/naco_data/GTO/'
 #db_filename='/Users/cheetham/data/naco_data/GTO/obs_table.dat'
 
-scripts_directory = os.path.expanduser('/data/beegfs/astro-storage/groups/henning/cheetham/naco-ispy-shared/code/naco_ispy/processing_scripts/')
+scripts_directory = os.path.expanduser('/data/beegfs/astro-storage/groups/henning/rlau/naco-ispy-shared/code/naco_ispy/processing_scripts/')
         
 dry_run = args.dry_run
 

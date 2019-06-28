@@ -18,8 +18,8 @@ import naco_ispy
 
 ## The folders on astro-node4
 # archive_folder = '/obs/insdata/NACO/raw/'
-new_data_folder = '/data/beegfs/astro-storage/groups/henning/cheetham/naco-ispy-shared/raw_data/'
-reduction_folder = '/data/beegfs/astro-storage/groups/henning/cheetham/naco-ispy-shared/'
+new_data_folder = '/data/beegfs/astro-storage/groups/henning/rlau/naco-ispy-shared/raw_data/'
+reduction_folder = '/data/beegfs/astro-storage/groups/henning/rlau/naco-ispy-shared/'
 # copied_files_list = '/data/NACO/copied_files.txt'
 
 #########

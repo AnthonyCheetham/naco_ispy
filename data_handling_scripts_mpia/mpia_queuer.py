@@ -25,7 +25,7 @@ import os
 
 
 check_interval = 60 # sec
-queue_file = '/data/beegfs/astro-storage/groups/henning/cheetham/naco-ispy-shared/ispy_job_queue.que'
+queue_file = '/data/beegfs/astro-storage/groups/henning/rlau/naco-ispy-shared/ispy_job_queue.que'
 idle_cpu_percent = 50.0 # if it is less than this, the script will launch a job
 
 # Read/write functions for the queue file
